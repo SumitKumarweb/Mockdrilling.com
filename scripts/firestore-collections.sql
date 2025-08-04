@@ -1,0 +1,93 @@
+-- Firestore Collections Structure for MockDrilling
+-- This is a reference for the NoSQL document structure
+
+-- Users Collection
+-- Document ID: User UID
+-- Fields:
+-- {
+--   name: string,
+--   email: string,
+--   themePreference: 'light' | 'dark',
+--   createdAt: timestamp,
+--   lastLogin: timestamp,
+--   freeMockMetrics: {
+--     totalTaken: number,
+--     lastTaken: timestamp,
+--     strengths: object,
+--     weaknesses: object
+--   },
+--   purchasedMocks: array of objects
+-- }
+
+-- FreeMocks Collection
+-- Document ID: Auto-generated
+-- Fields:
+-- {
+--   userId: string,
+--   startedAt: timestamp,
+--   endedAt: timestamp,
+--   domain: 'frontend' | 'backend' | 'DSA',
+--   questions: array of objects,
+--   summary: {
+--     strengths: array,
+--     weaknesses: array,
+--     recommendations: array,
+--     score: number
+--   }
+-- }
+
+-- PaidMocks Collection
+-- Document ID: Auto-generated
+-- Fields:
+-- {
+--   mockId: string,
+--   userId: string,
+--   expertId: string,
+--   scheduledAt: timestamp,
+--   companyTarget: string,
+--   level: 'basic' | 'intermediate' | 'advanced',
+--   status: 'scheduled' | 'completed' | 'cancelled',
+--   feedback: {
+--     verbalSummary: string,
+--     writtenReport: string,
+--     resourceLinks: array
+--   },
+--   paidAmount: number,
+--   transactionId: string
+-- }
+
+-- Experts Collection
+-- Document ID: Auto-generated
+-- Fields:
+-- {
+--   expertId: string,
+--   name: string,
+--   bio: string,
+--   domains: array,
+--   availability: object,
+--   rating: number,
+--   completedMocks: number,
+--   profileImage: string
+-- }
+
+-- Transactions Collection
+-- Document ID: Auto-generated
+-- Fields:
+-- {
+--   transactionId: string,
+--   userId: string,
+--   amount: number,
+--   currency: 'INR',
+--   status: 'pending' | 'completed' | 'failed',
+--   paymentGatewayResponse: object,
+--   createdAt: timestamp
+-- }
+
+-- Security Rules Reference:
+-- - Users can read/write their own documents
+-- - PaidMocks accessible by user and assigned expert
+-- - Experts can access assigned paid mock sessions
+-- - Transactions require authentication
+-- - FreeMocks require user authentication
+
+SELECT 'Firestore collections structure defined' as status;
