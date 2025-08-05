@@ -1,130 +1,108 @@
 import { NextResponse } from "next/server"
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
-    const month = searchParams.get("month") || "current"
-    const domain = searchParams.get("domain") || "all"
-    const limit = Number.parseInt(searchParams.get("limit")) || 50
+    const limitCount = parseInt(searchParams.get("limit") || "50")
+    const userId = searchParams.get("userId")
 
-    // In a real implementation, you would:
-    // 1. Query database for rankings based on filters
-    // 2. Calculate scores based on interview performance
-    // 3. Handle pagination
-    // 4. Return sorted results
+    console.log('Fetching rankings, limit:', limitCount, 'userId:', userId)
 
-    // Mock rankings data generation
-    const generateMockRankings = (count) => {
-      const companies = [
-        "Google",
-        "Microsoft",
-        "Amazon",
-        "Netflix",
-        "Meta",
-        "Apple",
-        "Uber",
-        "Airbnb",
-        "Spotify",
-        "TCS",
-        "Infosys",
-        "Wipro",
-      ]
-      const domains = ["Frontend", "Backend", "DSA", "System Design"]
-      const names = [
-        "Priya Sharma",
-        "Rahul Kumar",
-        "Anita Desai",
-        "Vikram Singh",
-        "Sneha Patel",
-        "Arjun Reddy",
-        "Kavya Nair",
-        "Rohit Gupta",
-        "Meera Joshi",
-        "Aditya Verma",
-        "Pooja Agarwal",
-        "Sanjay Yadav",
-        "Riya Kapoor",
-        "Karan Malhotra",
-        "Divya Sinha",
-      ]
+    // Get all users - we'll sort by composite score after fetching
+    const usersRef = collection(db, 'users')
+    const rankingsQuery = query(
+      usersRef,
+      limit(limitCount * 2) // Get more users to account for sorting
+    )
 
-      return Array.from({ length: count }, (_, i) => {
-        const baseScore = 98 - i * 0.3
-        const name = i < names.length ? names[i] : `User ${i + 1}`
+    const querySnapshot = await getDocs(rankingsQuery)
+    const rankings = []
+    let userRank = null
 
-        return {
-          rank: i + 1,
-          userId: `user_${i + 1}`,
-          name,
-          avatar: `/placeholder.svg?height=40&width=40&text=${name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")}`,
-          company: companies[Math.floor(Math.random() * companies.length)],
-          score: Math.round(baseScore * 10) / 10,
-          interviewsGiven: Math.floor(Math.random() * 40) + 10,
-          interviewsTaken: Math.floor(Math.random() * 20) + 5,
-          drillPoints: Math.floor(4200 - i * 80),
-          change: Math.floor(Math.random() * 7) - 3, // -3 to +3
-          domain: domains[Math.floor(Math.random() * domains.length)],
-          monthlyInterviews: Math.floor(Math.random() * 15) + 5,
-          successRate: Math.round((95 - i * 0.2) * 10) / 10,
-        }
+    // First pass: calculate composite scores
+    const userScores = []
+    querySnapshot.forEach((doc) => {
+      const userData = doc.data()
+      
+      // Calculate feedback-based score
+      const feedbackStats = userData.feedbackStats || {}
+      const averageRating = feedbackStats.averageRating || 0
+      const averageOverallScore = feedbackStats.averageOverallScore || 0
+      const totalFeedback = feedbackStats.totalFeedback || 0
+      
+      // Calculate composite score (drill points + feedback score)
+      const feedbackScore = (averageRating * 20) + (averageOverallScore * 10) // Weighted feedback score
+      const compositeScore = (userData.drillPoints || 0) + feedbackScore
+      
+      userScores.push({
+        doc,
+        userData,
+        compositeScore,
+        feedbackStats,
+        averageRating,
+        averageOverallScore,
+        totalFeedback,
+        feedbackScore: Math.round(feedbackScore)
       })
-    }
+    })
 
-    const rankings = generateMockRankings(limit)
+    // Sort by composite score
+    userScores.sort((a, b) => b.compositeScore - a.compositeScore)
 
-    // Filter by domain if specified
-    const filteredRankings =
-      domain === "all" ? rankings : rankings.filter((user) => user.domain.toLowerCase() === domain.toLowerCase())
+    // Second pass: create ranking entries
+    userScores.slice(0, limitCount).forEach((userScore, index) => {
+      const { doc, userData, compositeScore, feedbackStats, averageRating, averageOverallScore, totalFeedback, feedbackScore } = userScore
+      const rank = index + 1
+      
+      const rankingEntry = {
+        rank,
+        userId: doc.id,
+        name: userData.displayName || userData.name || 'Anonymous',
+        email: userData.email || '',
+        drillPoints: userData.drillPoints || 0,
+        interviewsTaken: userData.interviewsTaken || 0,
+        interviewsGiven: userData.interviewsGiven || 0,
+        totalInterviews: (userData.interviewsTaken || 0) + (userData.interviewsGiven || 0),
+        level: userData.experience === "0" ? "Beginner" : 
+               userData.experience === "1" ? "Novice" :
+               userData.experience === "2" ? "Intermediate" :
+               userData.experience === "3" ? "Advanced" :
+               userData.experience === "4" ? "Expert" :
+               userData.experience === "5" ? "Master" : "Legend",
+        profilePhoto: userData.profilePhoto || '/placeholder.svg?height=120&width=120&text=AD',
+        // Feedback-based metrics
+        averageRating: parseFloat(averageRating.toFixed(1)),
+        averageOverallScore: parseFloat(averageOverallScore.toFixed(1)),
+        totalFeedback: totalFeedback,
+        feedbackScore: feedbackScore,
+        compositeScore: Math.round(compositeScore)
+      }
 
-    // Mock current user data
-    const currentUser = {
-      rank: 23,
-      userId: "current_user",
-      name: "Alex Developer",
-      avatar: "/placeholder.svg?height=40&width=40&text=AD",
-      company: "Tech Corp",
-      score: 87.5,
-      interviewsGiven: 18,
-      interviewsTaken: 12,
-      drillPoints: 1250,
-      change: 5,
-      domain: "Frontend",
-      monthlyInterviews: 8,
-      successRate: 89.2,
-    }
+      rankings.push(rankingEntry)
 
-    // Mock statistics
-    const stats = {
-      totalUsers: 1456,
-      totalInterviews: 2988,
-      avgScore: 84.2,
-      topScore: 98.5,
-      domainStats: {
-        frontend: { interviews: 1245, avgScore: 85.1 },
-        backend: { interviews: 987, avgScore: 83.8 },
-        dsa: { interviews: 756, avgScore: 82.9 },
-      },
-    }
+      // Track current user's rank
+      if (userId && doc.id === userId) {
+        userRank = rankingEntry
+      }
+    })
+
+    console.log(`Retrieved ${rankings.length} rankings`)
 
     return NextResponse.json({
       success: true,
-      data: {
-        rankings: filteredRankings,
-        currentUser,
-        stats,
-        filters: {
-          month,
-          domain,
-          limit,
-        },
-      },
+      rankings,
+      userRank,
+      message: "Rankings retrieved successfully"
     })
   } catch (error) {
-    console.error("Error fetching rankings:", error)
-    return NextResponse.json({ success: false, error: "Failed to fetch rankings" }, { status: 500 })
+    console.error('Error retrieving rankings:', error)
+    return NextResponse.json({ 
+      success: false, 
+      error: "Failed to retrieve rankings",
+      details: error.message 
+    }, { status: 500 })
   }
 }
 

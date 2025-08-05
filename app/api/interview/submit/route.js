@@ -4,7 +4,7 @@ import { db } from '@/lib/firebase'
 
 export async function POST(request) {
   try {
-    const { sessionId, endTime, code, language, responses, userId, interviewType = 'take' } = await request.json()
+    const { sessionId, endTime, code, language, responses, userId, interviewType = 'take', domain } = await request.json()
 
     // Calculate interview duration
     const startTime = new Date(Date.now() - 45 * 60 * 1000) // Mock start time
@@ -22,6 +22,7 @@ export async function POST(request) {
     // Update user's drill points and interview counts
     let drillPointsUpdate = null
     let interviewCountsUpdate = null
+    let activityStored = null
     
     if (userId) {
       try {
@@ -44,6 +45,49 @@ export async function POST(request) {
           interviewCountsUpdate = { success: true, type: interviewType }
           
           console.log(`Drill points updated for user ${userId}: ${drillPointsChange} points (${interviewType} interview)`)
+          
+          // Store interview activity
+          try {
+            console.log('Storing interview activity:', {
+              userId,
+              sessionId,
+              interviewType,
+              domain: domain || 'unknown',
+              score: scores.overall,
+              points: drillPointsChange,
+              duration,
+              language,
+            })
+            
+            const activityResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/interview/activity`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId,
+                sessionId,
+                interviewType,
+                domain: domain || 'unknown',
+                score: scores.overall,
+                points: drillPointsChange,
+                duration,
+                language,
+              })
+            })
+            
+            const activityResult = await activityResponse.json()
+            console.log('Activity storage result:', activityResult)
+            
+            if (activityResult.success) {
+              activityStored = { success: true, activity: activityResult.activity }
+              console.log('Interview activity stored successfully')
+            } else {
+              console.error('Failed to store activity:', activityResult.error)
+              activityStored = { success: false, error: activityResult.error }
+            }
+          } catch (activityError) {
+            console.error('Error storing activity:', activityError)
+            activityStored = { success: false, error: activityError.message }
+          }
         }
       } catch (firestoreError) {
         console.error('Error updating user drill points:', firestoreError)
@@ -76,6 +120,7 @@ export async function POST(request) {
       results,
       drillPointsUpdate,
       interviewCountsUpdate,
+      activityStored,
       message: "Interview submitted successfully",
     })
   } catch (error) {
@@ -200,33 +245,14 @@ function calculateScores(code, language, responses) {
   }
 }
 
-// Calculate drill points based on performance and interview type
+// Calculate drill points based on interview type
 function calculateDrillPoints(scores, duration, interviewType) {
-  let basePoints = 0
-  
   if (interviewType === 'take') {
-    // Taking an interview costs points
-    basePoints = -120 // Cost for taking an interview
-    
-    // Performance bonus (can reduce the cost or even earn points)
-    const performanceBonus = Math.floor(scores.overall * 0.8) // Up to 80 points based on performance
-    const durationBonus = Math.min(Math.floor(duration / 5), 20) // Up to 20 points for duration
-    const codeQualityBonus = Math.floor(scores.code * 0.3) // Up to 30 points for code quality
-    
-    const totalBonus = performanceBonus + durationBonus + codeQualityBonus
-    const finalPoints = basePoints + totalBonus
-    
-    // Ensure user doesn't lose more than 50 points for a bad performance
-    return Math.max(finalPoints, -50)
+    // Taking an interview directly deducts 120 points
+    return -120
   } else if (interviewType === 'give') {
-    // Giving an interview earns points
-    basePoints = 100 // Base reward for giving an interview
-    
-    // Quality bonus based on how well they conducted the interview
-    const qualityBonus = Math.floor(Math.random() * 50) + 25 // 25-75 points
-    const durationBonus = Math.min(Math.floor(duration / 10), 15) // Up to 15 points for duration
-    
-    return basePoints + qualityBonus + durationBonus
+    // Giving an interview directly adds 100 points
+    return 100
   }
   
   return 0

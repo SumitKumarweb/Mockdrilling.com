@@ -40,7 +40,7 @@ import { useAuth } from "@/hooks/useAuth"
 export default function TakeInterviewPage() {
   const params = useParams()
   const domain = params.domain
-  const { user } = useAuth()
+  const { user, updateInterviewCounts } = useAuth()
   const [timeLeft, setTimeLeft] = useState(45 * 60) // 45 minutes
   const [isRecording, setIsRecording] = useState(false)
   const [isVideoOn, setIsVideoOn] = useState(false)
@@ -393,6 +393,7 @@ export default App;`,
           responses: interviewData.responses,
           userId: user?.uid,
           interviewType: 'take',
+          domain: domain,
         }),
       })
 
@@ -402,6 +403,12 @@ export default App;`,
         console.log('Interview submitted successfully:', result)
         if (result.drillPointsUpdate?.success) {
           console.log(`Drill points updated: ${result.drillPointsUpdate.pointsChange} points`)
+        }
+        
+        // Update interview counts locally
+        if (user?.uid) {
+          await updateInterviewCounts('take', 1)
+          console.log('Interview count updated locally')
         }
       }
 

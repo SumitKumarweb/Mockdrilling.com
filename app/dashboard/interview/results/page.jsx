@@ -235,8 +235,8 @@ export default function InterviewResultsPage() {
                 {results?.drillPointsEarned 
                   ? `${results.drillPointsEarned >= 0 ? '+' : ''}${results.drillPointsEarned} Drill Points ${results.drillPointsEarned >= 0 ? 'earned' : 'deducted'} from your account`
                   : interviewType === "take"
-                    ? "Drill Points will be deducted from your account"
-                    : "Drill Points will be added to your account"}
+                    ? "120 Drill Points will be deducted from your account"
+                    : "100 Drill Points will be added to your account"}
               </AlertDescription>
             </Alert>
 

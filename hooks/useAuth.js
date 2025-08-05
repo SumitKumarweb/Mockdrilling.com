@@ -206,14 +206,18 @@ export function AuthProvider({ children }) {
       const currentTaken = userProfile?.interviewsTaken || 0
       const currentGiven = userProfile?.interviewsGiven || 0
       
+      // Map interview types to the correct field
+      const isTaken = type === 'take' || type === 'taken'
+      const isGiven = type === 'give' || type === 'given'
+      
       const userData = {
-        interviewsTaken: type === 'taken' ? currentTaken + count : currentTaken,
-        interviewsGiven: type === 'given' ? currentGiven + count : currentGiven,
+        interviewsTaken: isTaken ? currentTaken + count : currentTaken,
+        interviewsGiven: isGiven ? currentGiven + count : currentGiven,
         updatedAt: new Date().toISOString(),
       }
 
       await updateDoc(doc(db, 'users', user.uid), userData)
-      console.log('Interview counts updated successfully in Firestore')
+      console.log('Interview counts updated successfully in Firestore:', userData)
       
       // Update local state
       setUserProfile(prev => ({
@@ -234,10 +238,13 @@ export function AuthProvider({ children }) {
       // Update local state even if Firestore fails
       const currentTaken = userProfile?.interviewsTaken || 0
       const currentGiven = userProfile?.interviewsGiven || 0
+      const isTaken = type === 'take' || type === 'taken'
+      const isGiven = type === 'give' || type === 'given'
+      
       setUserProfile(prev => ({
         ...prev,
-        interviewsTaken: type === 'taken' ? currentTaken + count : currentTaken,
-        interviewsGiven: type === 'given' ? currentGiven + count : currentGiven
+        interviewsTaken: isTaken ? currentTaken + count : currentTaken,
+        interviewsGiven: isGiven ? currentGiven + count : currentGiven
       }))
       
       return { success: false, error: error.message }

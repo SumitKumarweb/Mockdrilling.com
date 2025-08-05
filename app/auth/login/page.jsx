@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -32,10 +32,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const searchParams = useSearchParams()
   const redirect = searchParams.get("redirect")
-  const { signIn, signInWithGoogle, signInWithGithub } = useAuth()
+  const { signIn, signInWithGoogle, signInWithGithub, user } = useAuth()
   const router = useRouter()
+
+  // Redirect to dashboard if user is already logged in
+  useEffect(() => {
+    if (user) {
+      console.log('User already logged in, redirecting to dashboard')
+      router.push('/dashboard')
+    } else {
+      setIsCheckingAuth(false)
+    }
+  }, [user, router])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -126,6 +137,18 @@ export default function LoginPage() {
       setError("An unexpected error occurred. Please try again.")
       setIsLoading(false)
     }
+  }
+
+  // Show loading spinner while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-green-500/30 border-t-green-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400 font-mono">Checking authentication...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -24,12 +24,15 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import ProtectedRoute from "@/components/protected-route"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function InterviewSelectPage() {
   const [selectedOption, setSelectedOption] = useState(null)
   const [selectedDomain, setSelectedDomain] = useState(null)
-  const [userPoints] = useState(1250)
+  const { userProfile } = useAuth()
   const router = useRouter()
+  
+  const userPoints = userProfile?.drillPoints || 1000
 
   const interviewOptions = [
     {

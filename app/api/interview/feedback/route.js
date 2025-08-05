@@ -1,136 +1,207 @@
 import { NextResponse } from "next/server"
+import { doc, setDoc, getDoc, updateDoc, collection, query, where, orderBy, getDocs } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
 
-// Mock database for storing feedback
-const feedbackStore = new Map()
-
-export async function GET(request) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const sessionId = searchParams.get("sessionId")
-    const questionId = searchParams.get("questionId")
-
-    if (!sessionId || !questionId) {
-      return NextResponse.json({ success: false, error: "Session ID and Question ID are required" }, { status: 400 })
-    }
-
-    // Simulate backend processing delay
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    // Check if feedback exists in our mock store
-    const feedbackKey = `${sessionId}_${questionId}`
-    const existingFeedback = feedbackStore.get(feedbackKey)
-
-    if (existingFeedback) {
-      return NextResponse.json({
-        success: true,
-        feedback: existingFeedback,
-        message: "Feedback retrieved successfully",
-      })
-    }
-
-    // Simulate AI-generated feedback based on question
-    const mockFeedbacks = {
-      1: {
-        suggestions:
-          "Consider asking about hoisting behavior and scope differences. Test their understanding of temporal dead zone with let/const.",
-        score: Math.floor(Math.random() * 3) + 7, // 7-10
-        analysis: "Candidate shows good understanding of variable declarations",
-        timestamp: new Date().toISOString(),
-      },
-      2: {
-        suggestions:
-          "Dive deeper into reconciliation process and fiber architecture. Ask about performance optimization techniques.",
-        score: Math.floor(Math.random() * 3) + 6, // 6-9
-        analysis: "Good grasp of Virtual DOM concepts, could improve on implementation details",
-        timestamp: new Date().toISOString(),
-      },
-      3: {
-        suggestions:
-          "Test their understanding of closure and timing. Compare with throttling and ask for real-world use cases.",
-        score: Math.floor(Math.random() * 4) + 6, // 6-10
-        analysis: "Strong problem-solving approach, good code structure",
-        timestamp: new Date().toISOString(),
-      },
-    }
-
-    // Randomly decide if backend has processed the feedback yet (70% chance)
-    const hasProcessed = Math.random() > 0.3
-
-    if (hasProcessed) {
-      const feedback = mockFeedbacks[questionId] || {
-        suggestions: "Continue with follow-up questions to assess deeper understanding.",
-        score: Math.floor(Math.random() * 4) + 6,
-        analysis: "Candidate response is being analyzed",
-        timestamp: new Date().toISOString(),
-      }
-
-      // Store in mock database
-      feedbackStore.set(feedbackKey, feedback)
-
-      return NextResponse.json({
-        success: true,
-        feedback,
-        message: "AI feedback generated successfully",
-      })
-    } else {
-      // Backend hasn't processed yet
-      return NextResponse.json({
-        success: false,
-        error: "Feedback not ready yet",
-        pending: true,
-        message: "Backend is still processing the candidate's response",
-      })
-    }
-  } catch (error) {
-    console.error("Get feedback error:", error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to retrieve feedback",
-        pending: true,
-      },
-      { status: 500 },
-    )
-  }
-}
-
+// POST - Submit feedback for an interview
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { sessionId, questionId, feedback, rating, timestamp } = body
+    const { 
+      sessionId, 
+      interviewerId, 
+      intervieweeId, 
+      domain, 
+      rating, 
+      comments, 
+      technicalScore, 
+      communicationScore, 
+      problemSolvingScore 
+    } = body
 
-    if (!sessionId || !questionId) {
-      return NextResponse.json({ success: false, error: "Session ID and Question ID are required" }, { status: 400 })
+    console.log('Submitting feedback for session:', sessionId)
+
+    if (!sessionId || !interviewerId || !intervieweeId || !domain || !rating) {
+      return NextResponse.json({ 
+        success: false, 
+        error: "Missing required fields" 
+      }, { status: 400 })
     }
 
-    // Store interviewer feedback
-    const feedbackKey = `interviewer_${sessionId}_${questionId}`
-    const interviewerFeedback = {
-      feedback: feedback || "",
-      rating: rating || 0,
-      timestamp: timestamp || new Date().toISOString(),
-      type: "interviewer",
+    // Validate rating
+    if (rating < 1 || rating > 5) {
+      return NextResponse.json({ 
+        success: false, 
+        error: "Rating must be between 1 and 5" 
+      }, { status: 400 })
     }
 
-    feedbackStore.set(feedbackKey, interviewerFeedback)
+    // Create feedback document
+    const feedbackData = {
+      sessionId,
+      interviewerId,
+      intervieweeId,
+      domain,
+      rating: parseFloat(rating),
+      comments: comments || "",
+      technicalScore: parseFloat(technicalScore) || 0,
+      communicationScore: parseFloat(communicationScore) || 0,
+      problemSolvingScore: parseFloat(problemSolvingScore) || 0,
+      timestamp: new Date().toISOString(),
+      // Calculate overall score
+      overallScore: calculateOverallScore(rating, technicalScore, communicationScore, problemSolvingScore)
+    }
 
-    // In production, save to database
-    // await db.feedback.create({
-    //   sessionId,
-    //   questionId,
-    //   feedback,
-    //   rating,
-    //   timestamp,
-    //   type: 'interviewer'
-    // })
+    // Store feedback in Firestore
+    await setDoc(doc(db, 'feedback', sessionId), feedbackData)
+
+    // Update interviewee's feedback stats
+    await updateUserFeedbackStats(intervieweeId, feedbackData)
+
+    console.log('Feedback submitted successfully for session:', sessionId)
 
     return NextResponse.json({
       success: true,
-      message: "Feedback saved successfully",
-      data: interviewerFeedback,
+      message: "Feedback submitted successfully",
+      feedback: feedbackData
     })
+
   } catch (error) {
-    console.error("Save feedback error:", error)
-    return NextResponse.json({ success: false, error: "Failed to save feedback" }, { status: 500 })
+    console.error('Error submitting feedback:', error)
+    return NextResponse.json({ 
+      success: false, 
+      error: "Failed to submit feedback",
+      details: error.message 
+    }, { status: 500 })
   }
+}
+
+// GET - Retrieve feedback for a user
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get("userId")
+    const limit = parseInt(searchParams.get("limit") || "10")
+
+    console.log('Fetching feedback for user:', userId, 'limit:', limit)
+
+    if (!userId) {
+      return NextResponse.json({ 
+        success: false, 
+        error: "User ID is required" 
+      }, { status: 400 })
+    }
+
+    // Get feedback where user is the interviewee
+    const feedbackRef = collection(db, 'feedback')
+    const feedbackQuery = query(
+      feedbackRef,
+      where('intervieweeId', '==', userId),
+      orderBy('timestamp', 'desc'),
+      orderBy('timestamp', 'desc'),
+    )
+
+    const querySnapshot = await getDocs(feedbackQuery)
+    const feedback = []
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data()
+      feedback.push({
+        id: doc.id,
+        ...data,
+        formattedDate: formatRelativeTime(data.timestamp)
+      })
+    })
+
+    console.log(`Retrieved ${feedback.length} feedback entries for user ${userId}`)
+
+    return NextResponse.json({
+      success: true,
+      feedback,
+      message: "Feedback retrieved successfully"
+    })
+
+  } catch (error) {
+    console.error('Error retrieving feedback:', error)
+    return NextResponse.json({ 
+      success: false, 
+      error: "Failed to retrieve feedback",
+      details: error.message 
+    }, { status: 500 })
+  }
+}
+
+// Helper function to calculate overall score
+function calculateOverallScore(rating, technicalScore, communicationScore, problemSolvingScore) {
+  const weights = {
+    rating: 0.4,
+    technical: 0.25,
+    communication: 0.2,
+    problemSolving: 0.15
+  }
+
+  return (
+    (rating * weights.rating) +
+    ((technicalScore || 0) * weights.technical) +
+    ((communicationScore || 0) * weights.communication) +
+    ((problemSolvingScore || 0) * weights.problemSolving)
+  )
+}
+
+// Helper function to update user feedback stats
+async function updateUserFeedbackStats(userId, feedbackData) {
+  try {
+    const userRef = doc(db, 'users', userId)
+    const userDoc = await getDoc(userRef)
+    
+    if (userDoc.exists()) {
+      const userData = userDoc.data()
+      const currentStats = userData.feedbackStats || {
+        totalFeedback: 0,
+        averageRating: 0,
+        totalRating: 0,
+        averageOverallScore: 0,
+        totalOverallScore: 0,
+        domains: {}
+      }
+
+      // Update stats
+      const newTotalFeedback = currentStats.totalFeedback + 1
+      const newTotalRating = currentStats.totalRating + feedbackData.rating
+      const newTotalOverallScore = currentStats.totalOverallScore + feedbackData.overallScore
+      
+      const updatedStats = {
+        totalFeedback: newTotalFeedback,
+        averageRating: newTotalRating / newTotalFeedback,
+        totalRating: newTotalRating,
+        averageOverallScore: newTotalOverallScore / newTotalFeedback,
+        totalOverallScore: newTotalOverallScore,
+        domains: {
+          ...currentStats.domains,
+          [feedbackData.domain]: (currentStats.domains[feedbackData.domain] || 0) + 1
+        }
+      }
+
+      await updateDoc(userRef, {
+        feedbackStats: updatedStats,
+        updatedAt: new Date().toISOString()
+      })
+
+      console.log('Updated feedback stats for user:', userId)
+    }
+  } catch (error) {
+    console.error('Error updating user feedback stats:', error)
+  }
+}
+
+// Helper function to format relative time
+function formatRelativeTime(timestamp) {
+  const now = new Date()
+  const time = new Date(timestamp)
+  const diffInSeconds = Math.floor((now - time) / 1000)
+
+  if (diffInSeconds < 60) return 'Just now'
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`
+  return `${Math.floor(diffInSeconds / 2592000)}mo ago`
 }

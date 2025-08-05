@@ -34,16 +34,29 @@ import {
 import ThreeScene from "./components/three-scene"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const router = useRouter()
+  const { user } = useAuth()
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Redirect to dashboard if user is already logged in
+  useEffect(() => {
+    if (user) {
+      console.log('User already logged in, redirecting to dashboard')
+      router.push('/dashboard')
+    } else {
+      setIsCheckingAuth(false)
+    }
+  }, [user, router])
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark")
@@ -57,7 +70,7 @@ export default function HomePage() {
     router.push("/auth/login?redirect=paid-mock")
   }
 
-  if (!mounted) {
+  if (!mounted || isCheckingAuth) {
     return null
   }
 

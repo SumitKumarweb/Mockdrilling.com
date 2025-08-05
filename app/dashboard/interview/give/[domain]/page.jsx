@@ -37,7 +37,7 @@ import { useAuth } from "@/hooks/useAuth"
 export default function GiveInterviewPage() {
   const params = useParams()
   const domain = params.domain
-  const { user } = useAuth()
+  const { user, updateInterviewCounts } = useAuth()
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [timeLeft, setTimeLeft] = useState(45 * 60) // 45 minutes
   const [feedback, setFeedback] = useState("")
@@ -272,6 +272,7 @@ export default function GiveInterviewPage() {
           responses: [], // No responses for giving interviews
           userId: user?.uid,
           interviewType: 'give',
+          domain: domain,
         }),
       })
 
@@ -281,6 +282,12 @@ export default function GiveInterviewPage() {
         console.log('Interview submitted successfully:', result)
         if (result.drillPointsUpdate?.success) {
           console.log(`Drill points updated: ${result.drillPointsUpdate.pointsChange} points`)
+        }
+        
+        // Update interview counts locally
+        if (user?.uid) {
+          await updateInterviewCounts('give', 1)
+          console.log('Interview count updated locally')
         }
       }
 
