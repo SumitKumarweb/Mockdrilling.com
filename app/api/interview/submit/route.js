@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
 
 export async function POST(request) {
   try {
-    const { sessionId, endTime, code, language, responses } = await request.json()
+    const { sessionId, endTime, code, language, responses, userId, interviewType = 'take' } = await request.json()
 
     // Calculate interview duration
     const startTime = new Date(Date.now() - 45 * 60 * 1000) // Mock start time
@@ -13,6 +15,41 @@ export async function POST(request) {
 
     // Calculate scores
     const scores = calculateScores(code, language, responses)
+
+    // Calculate drill points based on performance and interview type
+    const drillPointsChange = calculateDrillPoints(scores, duration, interviewType)
+
+    // Update user's drill points and interview counts
+    let drillPointsUpdate = null
+    let interviewCountsUpdate = null
+    
+    if (userId) {
+      try {
+        // Get current user profile
+        const userDoc = await getDoc(doc(db, 'users', userId))
+        if (userDoc.exists()) {
+          const userData = userDoc.data()
+          const currentPoints = userData.drillPoints || 0
+          const newPoints = Math.max(0, currentPoints + drillPointsChange)
+          
+          // Update drill points
+          await updateDoc(doc(db, 'users', userId), {
+            drillPoints: newPoints,
+            interviewsTaken: interviewType === 'take' ? (userData.interviewsTaken || 0) + 1 : userData.interviewsTaken || 0,
+            interviewsGiven: interviewType === 'give' ? (userData.interviewsGiven || 0) + 1 : userData.interviewsGiven || 0,
+            updatedAt: new Date().toISOString(),
+          })
+          
+          drillPointsUpdate = { success: true, newPoints, pointsChange: drillPointsChange }
+          interviewCountsUpdate = { success: true, type: interviewType }
+          
+          console.log(`Drill points updated for user ${userId}: ${drillPointsChange} points (${interviewType} interview)`)
+        }
+      } catch (firestoreError) {
+        console.error('Error updating user drill points:', firestoreError)
+        drillPointsUpdate = { success: false, error: firestoreError.message }
+      }
+    }
 
     // Store interview results (in production, save to database)
     const results = {
@@ -25,6 +62,8 @@ export async function POST(request) {
       feedback,
       scores,
       overallScore: scores.overall,
+      drillPointsEarned: drillPointsChange,
+      interviewType,
       status: "completed",
       createdAt: new Date().toISOString(),
     }
@@ -35,6 +74,8 @@ export async function POST(request) {
       success: true,
       sessionId,
       results,
+      drillPointsUpdate,
+      interviewCountsUpdate,
       message: "Interview submitted successfully",
     })
   } catch (error) {
@@ -157,4 +198,36 @@ function calculateScores(code, language, responses) {
     problemSolving: problemSolvingScore,
     overall,
   }
+}
+
+// Calculate drill points based on performance and interview type
+function calculateDrillPoints(scores, duration, interviewType) {
+  let basePoints = 0
+  
+  if (interviewType === 'take') {
+    // Taking an interview costs points
+    basePoints = -120 // Cost for taking an interview
+    
+    // Performance bonus (can reduce the cost or even earn points)
+    const performanceBonus = Math.floor(scores.overall * 0.8) // Up to 80 points based on performance
+    const durationBonus = Math.min(Math.floor(duration / 5), 20) // Up to 20 points for duration
+    const codeQualityBonus = Math.floor(scores.code * 0.3) // Up to 30 points for code quality
+    
+    const totalBonus = performanceBonus + durationBonus + codeQualityBonus
+    const finalPoints = basePoints + totalBonus
+    
+    // Ensure user doesn't lose more than 50 points for a bad performance
+    return Math.max(finalPoints, -50)
+  } else if (interviewType === 'give') {
+    // Giving an interview earns points
+    basePoints = 100 // Base reward for giving an interview
+    
+    // Quality bonus based on how well they conducted the interview
+    const qualityBonus = Math.floor(Math.random() * 50) + 25 // 25-75 points
+    const durationBonus = Math.min(Math.floor(duration / 10), 15) // Up to 15 points for duration
+    
+    return basePoints + qualityBonus + durationBonus
+  }
+  
+  return 0
 }

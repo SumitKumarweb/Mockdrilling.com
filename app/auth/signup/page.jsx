@@ -25,7 +25,8 @@ import {
   Gift,
 } from "lucide-react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -41,6 +42,8 @@ export default function SignupPage() {
   const [error, setError] = useState("")
   const searchParams = useSearchParams()
   const redirect = searchParams.get("redirect")
+  const { signUp, signInWithGoogle, signInWithGithub } = useAuth()
+  const router = useRouter()
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -63,36 +66,91 @@ export default function SignupPage() {
       return
     }
 
-    // Simulate signup process
-    setTimeout(() => {
-      if (formData.name && formData.email && formData.password) {
+    if (!formData.name || !formData.email || !formData.password) {
+      setError("Please fill in all fields")
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      const result = await signUp(formData.email, formData.password, formData.name)
+      
+      if (result.success) {
+        console.log('Signup successful, redirecting...', { redirect, user: result.user.email })
+        setIsLoading(false)
+        
         // Redirect based on the redirect parameter
-        if (redirect === "free-mock") {
-          window.location.href = "/dashboard/interview-select"
-        } else if (redirect === "paid-mock") {
-          window.location.href = "/dashboard/paid-mock"
-        } else {
-          window.location.href = "/dashboard"
+        try {
+          if (redirect === "free-mock") {
+            console.log('Redirecting to free mock interview')
+            await router.push("/dashboard/interview-select")
+          } else if (redirect === "paid-mock") {
+            console.log('Redirecting to paid mock interview')
+            await router.push("/dashboard/paid-mock")
+          } else {
+            console.log('Redirecting to dashboard')
+            await router.push("/dashboard")
+          }
+        } catch (routerError) {
+          console.error('Router error:', routerError)
+          // Fallback to dashboard if router fails
+          await router.push("/dashboard")
         }
       } else {
-        setError("Please fill in all fields")
+        console.log('Signup error:', result.error)
+        setError(result.error)
         setIsLoading(false)
       }
-    }, 1500)
+    } catch (error) {
+      console.error('Unexpected signup error:', error)
+      setError("An unexpected error occurred. Please try again.")
+      setIsLoading(false)
+    }
   }
 
-  const handleSocialSignup = (provider) => {
+  const handleSocialSignup = async (provider) => {
     setIsLoading(true)
-    // Simulate social signup
-    setTimeout(() => {
-      if (redirect === "free-mock") {
-        window.location.href = "/dashboard/interview-select"
-      } else if (redirect === "paid-mock") {
-        window.location.href = "/dashboard/paid-mock"
-      } else {
-        window.location.href = "/dashboard"
+    setError("")
+
+    try {
+      let result
+      if (provider === "google") {
+        result = await signInWithGoogle()
+      } else if (provider === "github") {
+        result = await signInWithGithub()
       }
-    }, 1000)
+
+      if (result && result.success) {
+        console.log('Social signup successful, redirecting...', { redirect, user: result.user.email })
+        setIsLoading(false)
+        
+        // Redirect based on the redirect parameter
+        try {
+          if (redirect === "free-mock") {
+            console.log('Redirecting to free mock interview')
+            await router.push("/dashboard/interview-select")
+          } else if (redirect === "paid-mock") {
+            console.log('Redirecting to paid mock interview')
+            await router.push("/dashboard/paid-mock")
+          } else {
+            console.log('Redirecting to dashboard')
+            await router.push("/dashboard")
+          }
+        } catch (routerError) {
+          console.error('Router error:', routerError)
+          // Fallback to dashboard if router fails
+          await router.push("/dashboard")
+        }
+      } else if (result) {
+        console.log('Social signup error:', result.error)
+        setError(result.error)
+        setIsLoading(false)
+      }
+    } catch (error) {
+      console.error('Social signup error:', error)
+      setError("An unexpected error occurred. Please try again.")
+      setIsLoading(false)
+    }
   }
 
   return (

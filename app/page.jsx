@@ -33,11 +33,13 @@ import {
 } from "lucide-react"
 import ThreeScene from "./components/three-scene"
 import { useTheme } from "next-themes"
+import { useRouter } from "next/navigation"
 
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
@@ -45,6 +47,14 @@ export default function HomePage() {
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark")
+  }
+
+  const handleFreeMockClick = () => {
+    router.push("/auth/login?redirect=free-mock")
+  }
+
+  const handlePaidMockClick = () => {
+    router.push("/auth/login?redirect=paid-mock")
   }
 
   if (!mounted) {
@@ -146,7 +156,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className="text-lg px-8 py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                onClick={() => (window.location.href = "/auth/login?redirect=free-mock")}
+                onClick={handleFreeMockClick}
               >
                 <Play className="w-5 h-5 mr-2" />
                 Start Free Mock Interview
@@ -155,7 +165,7 @@ export default function HomePage() {
                 size="lg"
                 variant="outline"
                 className="text-lg px-8 py-6 bg-transparent"
-                onClick={() => (window.location.href = "/auth/login?redirect=paid-mock")}
+                onClick={handlePaidMockClick}
               >
                 <Calendar className="w-5 h-5 mr-2" />
                 Book Professional Mock (₹499)
@@ -237,7 +247,7 @@ export default function HomePage() {
                 <Button
                   className="w-full mt-6"
                   size="lg"
-                  onClick={() => (window.location.href = "/auth/login?redirect=free-mock")}
+                  onClick={handleFreeMockClick}
                 >
                   Start Free Interview
                 </Button>
@@ -291,7 +301,7 @@ export default function HomePage() {
                 <Button
                   className="w-full mt-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                   size="lg"
-                  onClick={() => (window.location.href = "/auth/login?redirect=paid-mock")}
+                  onClick={handlePaidMockClick}
                 >
                   Book Expert Interview
                 </Button>
@@ -349,7 +359,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
-                onClick={() => (window.location.href = "/auth/login?redirect=free-mock")}
+                onClick={handleFreeMockClick}
               >
                 <Play className="w-5 h-5 mr-2" />
                 Start Free Interview
@@ -453,7 +463,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                onClick={() => (window.location.href = "/auth/login?redirect=paid-mock")}
+                onClick={handlePaidMockClick}
               >
                 <Calendar className="w-5 h-5 mr-2" />
                 Book Expert Interview
@@ -517,7 +527,7 @@ export default function HomePage() {
       </section>
 
       {/* Email Capture */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-20 bg-gradient-to-r from-black-600 to-purple-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Get Interview Tips & Exclusive Discounts</h2>
           <p className="text-xl text-blue-100 mb-8">

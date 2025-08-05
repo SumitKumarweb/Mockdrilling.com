@@ -32,10 +32,12 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function GiveInterviewPage() {
   const params = useParams()
   const domain = params.domain
+  const { user } = useAuth()
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [timeLeft, setTimeLeft] = useState(45 * 60) // 45 minutes
   const [feedback, setFeedback] = useState("")
@@ -249,18 +251,45 @@ export default function GiveInterviewPage() {
     saveFeedbackToBackend()
   }
 
-  const handleSubmitInterview = () => {
+  const handleSubmitInterview = async () => {
     setIsSubmitting(true)
 
-    // Save final feedback
-    if (feedback.trim()) {
-      saveFeedbackToBackend()
-    }
+    try {
+      // Save final feedback
+      if (feedback.trim()) {
+        await saveFeedbackToBackend()
+      }
 
-    // Simulate submission
-    setTimeout(() => {
+      // Submit interview to API
+      const response = await fetch("/api/interview/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          endTime: new Date().toISOString(),
+          code: "", // No code for giving interviews
+          language: "none",
+          responses: [], // No responses for giving interviews
+          userId: user?.uid,
+          interviewType: 'give',
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        console.log('Interview submitted successfully:', result)
+        if (result.drillPointsUpdate?.success) {
+          console.log(`Drill points updated: ${result.drillPointsUpdate.pointsChange} points`)
+        }
+      }
+
+      // Redirect to results
       window.location.href = "/dashboard/interview/results?type=give"
-    }, 2000)
+    } catch (error) {
+      console.error("Failed to submit interview:", error)
+      setIsSubmitting(false)
+    }
   }
 
   const progress = ((currentQuestion + 1) / currentQuestions.length) * 100

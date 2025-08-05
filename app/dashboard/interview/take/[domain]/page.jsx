@@ -35,10 +35,12 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function TakeInterviewPage() {
   const params = useParams()
   const domain = params.domain
+  const { user } = useAuth()
   const [timeLeft, setTimeLeft] = useState(45 * 60) // 45 minutes
   const [isRecording, setIsRecording] = useState(false)
   const [isVideoOn, setIsVideoOn] = useState(false)
@@ -389,10 +391,19 @@ export default App;`,
           code,
           language,
           responses: interviewData.responses,
+          userId: user?.uid,
+          interviewType: 'take',
         }),
       })
 
       const result = await response.json()
+
+      if (result.success) {
+        console.log('Interview submitted successfully:', result)
+        if (result.drillPointsUpdate?.success) {
+          console.log(`Drill points updated: ${result.drillPointsUpdate.pointsChange} points`)
+        }
+      }
 
       // Redirect to results
       window.location.href = `/dashboard/interview/results?sessionId=${interviewData.sessionId}`

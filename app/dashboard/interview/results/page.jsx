@@ -232,9 +232,11 @@ export default function InterviewResultsPage() {
             <Alert className="bg-green-500/10 border-green-500/30 text-green-400">
               <Gift className="h-4 w-4" />
               <AlertDescription className="font-mono">
-                {interviewType === "take"
-                  ? "120 Drill Points have been deducted from your account"
-                  : "100 Drill Points have been added to your account"}
+                {results?.drillPointsEarned 
+                  ? `${results.drillPointsEarned >= 0 ? '+' : ''}${results.drillPointsEarned} Drill Points ${results.drillPointsEarned >= 0 ? 'earned' : 'deducted'} from your account`
+                  : interviewType === "take"
+                    ? "Drill Points will be deducted from your account"
+                    : "Drill Points will be added to your account"}
               </AlertDescription>
             </Alert>
 
@@ -370,6 +372,14 @@ export default function InterviewResultsPage() {
                         <span className="text-gray-400">Session:</span>
                         <span className="text-white">{results.sessionId?.substring(0, 8)}...</span>
                       </div>
+                      {results.drillPointsEarned && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Drill Points:</span>
+                          <span className={`font-mono ${results.drillPointsEarned >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {results.drillPointsEarned >= 0 ? '+' : ''}{results.drillPointsEarned} points
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
