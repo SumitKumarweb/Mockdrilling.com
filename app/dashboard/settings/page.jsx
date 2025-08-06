@@ -597,7 +597,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label className="text-white font-mono">Available for Interviews</Label>
-                      <p className="text-gray-400 text-sm font-mono">Show as available to give interviews</p>
+                      <p className="text-gray-400 text-sm font-mono">Show as available to conduct interviews</p>
                     </div>
                     <Switch
                       checked={privacy.availableForInterview}

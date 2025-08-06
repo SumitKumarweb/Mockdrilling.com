@@ -154,8 +154,8 @@ function calculateInterviewAchievements(userData, type) {
     if (interviewsTaken === 1) {
       achievements.push({
         id: 'first_interview',
-        name: 'First Steps',
-        description: 'Completed your first interview',
+        name: 'First Practice',
+        description: 'Completed your first practice interview',
         icon: '🎯',
         category: 'interview',
         rarity: 'common',
@@ -165,8 +165,8 @@ function calculateInterviewAchievements(userData, type) {
     if (interviewsTaken >= 5) {
       achievements.push({
         id: 'interview_enthusiast',
-        name: 'Interview Enthusiast',
-        description: 'Completed 5 interviews',
+        name: 'Practice Enthusiast',
+        description: 'Completed 5 practice interviews',
         icon: '📚',
         category: 'interview',
         rarity: 'uncommon',
@@ -176,8 +176,8 @@ function calculateInterviewAchievements(userData, type) {
     if (interviewsTaken >= 10) {
       achievements.push({
         id: 'interview_veteran',
-        name: 'Interview Veteran',
-        description: 'Completed 10 interviews',
+        name: 'Practice Veteran',
+        description: 'Completed 10 practice interviews',
         icon: '🏆',
         category: 'interview',
         rarity: 'rare',
@@ -187,8 +187,8 @@ function calculateInterviewAchievements(userData, type) {
     if (interviewsTaken >= 25) {
       achievements.push({
         id: 'interview_master',
-        name: 'Interview Master',
-        description: 'Completed 25 interviews',
+        name: 'Practice Master',
+        description: 'Completed 25 practice interviews',
         icon: '👑',
         category: 'interview',
         rarity: 'epic',
@@ -201,7 +201,7 @@ function calculateInterviewAchievements(userData, type) {
     if (interviewsGiven === 1) {
       achievements.push({
         id: 'first_mentor',
-        name: 'First Mentor',
+        name: 'First Interviewer',
         description: 'Conducted your first interview',
         icon: '🤝',
         category: 'mentoring',
@@ -212,7 +212,7 @@ function calculateInterviewAchievements(userData, type) {
     if (interviewsGiven >= 5) {
       achievements.push({
         id: 'helpful_mentor',
-        name: 'Helpful Mentor',
+        name: 'Helpful Interviewer',
         description: 'Conducted 5 interviews',
         icon: '👨‍🏫',
         category: 'mentoring',
@@ -223,7 +223,7 @@ function calculateInterviewAchievements(userData, type) {
     if (interviewsGiven >= 10) {
       achievements.push({
         id: 'expert_mentor',
-        name: 'Expert Mentor',
+        name: 'Expert Interviewer',
         description: 'Conducted 10 interviews',
         icon: '🎓',
         category: 'mentoring',

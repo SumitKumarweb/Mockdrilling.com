@@ -153,10 +153,10 @@ export default function UserProfilePage() {
     if (user.drillPoints >= 100) achievements.push({ name: "Drill Novice", icon: "🥉", description: "Reached 100+ drill points" })
     
     // Interview achievements
-    if (user.interviewsTaken >= 10) achievements.push({ name: "Interview Veteran", icon: "🎯", description: "Taken 10+ interviews" })
-    if (user.interviewsTaken >= 5) achievements.push({ name: "Interview Enthusiast", icon: "📚", description: "Taken 5+ interviews" })
-    if (user.interviewsGiven >= 10) achievements.push({ name: "Mentor", icon: "👨‍🏫", description: "Given 10+ interviews" })
-    if (user.interviewsGiven >= 5) achievements.push({ name: "Helper", icon: "🤝", description: "Given 5+ interviews" })
+    if (user.interviewsTaken >= 10) achievements.push({ name: "Practice Veteran", icon: "🎯", description: "Taken 10+ practice interviews" })
+    if (user.interviewsTaken >= 5) achievements.push({ name: "Practice Enthusiast", icon: "📚", description: "Taken 5+ practice interviews" })
+    if (user.interviewsGiven >= 10) achievements.push({ name: "Expert Interviewer", icon: "👨‍🏫", description: "Given 10+ interviews" })
+    if (user.interviewsGiven >= 5) achievements.push({ name: "Helpful Interviewer", icon: "🤝", description: "Given 5+ interviews" })
     
     // Combined achievements
     if (user.interviewsTaken + user.interviewsGiven >= 20) achievements.push({ name: "Community Pillar", icon: "🏛️", description: "Total 20+ interviews" })
@@ -284,19 +284,19 @@ export default function UserProfilePage() {
 
                   <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
                     <div className="flex items-center">
+                      <Users className="w-5 h-5 text-green-400 mr-2" />
+                      <span className="text-gray-300">Interviews Given</span>
+                    </div>
+                    <span className="text-green-400 font-bold">{userProfile.interviewsGiven || 0}</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
+                    <div className="flex items-center">
                       <Target className="w-5 h-5 text-blue-400 mr-2" />
                       <span className="text-gray-300">Interviews Taken</span>
                     </div>
                     <span className="text-blue-400 font-bold">{userProfile.interviewsTaken || 0}</span>
-            </div>
-                  
-                  <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
-                    <div className="flex items-center">
-                      <Users className="w-5 h-5 text-green-400 mr-2" />
-                      <span className="text-gray-300">Interviews Given</span>
-          </div>
-                    <span className="text-green-400 font-bold">{userProfile.interviewsGiven || 0}</span>
-        </div>
+                  </div>
 
                   {/* Streak Information */}
                   <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">

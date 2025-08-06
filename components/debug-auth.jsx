@@ -30,8 +30,8 @@ export default function DebugAuth() {
           <>
             <p>Name: {userProfile.name || 'Not set'}</p>
             <p>Drill Points: {userProfile.drillPoints || 0}</p>
-            <p>Interviews Taken: {userProfile.interviewsTaken || 0}</p>
-            <p>Interviews Given: {userProfile.interviewsGiven || 0}</p>
+                    <p>Interviews Given: {userProfile.interviewsGiven || 0}</p>
+        <p>Interviews Taken: {userProfile.interviewsTaken || 0}</p>
             <p>Experience: {userProfile.experience || 'Not set'}</p>
           </>
         )}

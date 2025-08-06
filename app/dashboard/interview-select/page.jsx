@@ -36,27 +36,27 @@ export default function InterviewSelectPage() {
 
   const interviewOptions = [
     {
-      id: "take",
-      title: "Take Interview",
-      description: "Practice your skills by taking a mock interview",
-      cost: 120,
-      icon: Minus,
-      color: "blue",
-      benefits: ["Get interviewed by peers", "Receive detailed feedback", "Improve your answers", "Build confidence"],
-    },
-    {
       id: "give",
       title: "Give Interview",
-      description: "Earn points by interviewing other candidates",
-      cost: -100,
-      icon: Plus,
+      description: "Conduct interviews for other candidates",
+      cost: 120,
+      icon: Minus,
       color: "green",
       benefits: [
-        "Earn drill points",
         "Help other developers",
         "Improve questioning skills",
         "Build interviewing experience",
+        "Contribute to community",
       ],
+    },
+    {
+      id: "take",
+      title: "Take Interview",
+      description: "Practice your skills by taking a mock interview",
+      cost: -100,
+      icon: Plus,
+      color: "blue",
+      benefits: ["Earn drill points", "Get interviewed by peers", "Receive detailed feedback", "Improve your answers", "Build confidence"],
     },
   ]
 
@@ -87,15 +87,12 @@ export default function InterviewSelectPage() {
     },
   ]
 
-  const canProceed = selectedOption && selectedDomain && (selectedOption === "give" || userPoints >= 120)
+  const canProceed = selectedOption && selectedDomain && (selectedOption === "take" || userPoints >= 120)
 
   const handleProceed = () => {
     if (canProceed) {
-      if (selectedOption === "take") {
-        router.push(`/dashboard/interview/take/${selectedDomain}`)
-      } else {
-        router.push(`/dashboard/interview/give/${selectedDomain}`)
-      }
+      // Pass the interview type as a URL parameter
+      router.push(`/dashboard/interview/take/${selectedDomain}?type=${selectedOption}`)
     }
   }
 

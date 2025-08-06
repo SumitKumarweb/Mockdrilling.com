@@ -279,14 +279,14 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="text-center p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                      <div className="text-xl font-bold text-red-400">{stats.interviewsTaken}</div>
-                      <div className="text-xs text-gray-400 font-mono">Taken</div>
-                    </div>
-                    <div className="text-center p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-                      <div className="text-xl font-bold text-emerald-400">{stats.interviewsGiven}</div>
-                      <div className="text-xs text-gray-400 font-mono">Given</div>
-                    </div>
+                                      <div className="text-center p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                    <div className="text-xl font-bold text-emerald-400">{stats.interviewsGiven}</div>
+                    <div className="text-xs text-gray-400 font-mono">Given (-120 DP)</div>
+                  </div>
+                  <div className="text-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <div className="text-xl font-bold text-blue-400">{stats.interviewsTaken}</div>
+                    <div className="text-xs text-gray-400 font-mono">Taken (+100 DP)</div>
+                  </div>
                     <div className="text-center p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
                       <div className="text-xl font-bold text-orange-400">{userProfile?.currentStreak || 0}</div>
                       <div className="text-xs text-gray-400 font-mono">Day Streak</div>
@@ -302,11 +302,11 @@ export default function Dashboard() {
             <CardContent className="p-6">
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                          <Target className="w-6 h-6 text-green-400" />
+                          <Users className="w-6 h-6 text-green-400" />
                         </div>
                 <div>
-                          <h3 className="text-white font-mono font-bold">Take Interview</h3>
-                          <p className="text-gray-400 font-mono text-sm">Practice with AI interviewer</p>
+                          <h3 className="text-white font-mono font-bold">Give Interview</h3>
+                          <p className="text-gray-400 font-mono text-sm">Conduct interviews for others</p>
                 </div>
                         <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-green-400 transition-colors ml-auto" />
               </div>
@@ -314,18 +314,18 @@ export default function Dashboard() {
           </Card>
                 </Link>
 
-                <Link href="/dashboard/paid-mock">
-                  <Card className="bg-black/40 border-purple-500/20 backdrop-blur-xl hover:border-purple-500/40 transition-all cursor-pointer group">
+                <Link href="/dashboard/interview-select">
+                  <Card className="bg-black/40 border-blue-500/20 backdrop-blur-xl hover:border-blue-500/40 transition-all cursor-pointer group">
             <CardContent className="p-6">
                       <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
-                          <Trophy className="w-6 h-6 text-purple-400" />
-              </div>
+                        <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                          <Target className="w-6 h-6 text-blue-400" />
+                        </div>
                 <div>
-                          <h3 className="text-white font-mono font-bold">Professional Mock</h3>
-                          <p className="text-gray-400 font-mono text-sm">Expert feedback & coaching</p>
+                          <h3 className="text-white font-mono font-bold">Expert Interview</h3>
+                          <p className="text-gray-400 font-mono text-sm">Practice with Expert interviewer</p>
                 </div>
-                        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors ml-auto" />
+                        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors ml-auto" />
               </div>
             </CardContent>
           </Card>
@@ -799,20 +799,32 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-3">
-                    <Link href="/dashboard/settings">
+                    <Link href="/dashboard/interview-select">
                       <Button variant="outline" className="w-full bg-black/20 border-green-600 text-green-400 hover:text-white">
+                        <Users className="w-4 h-4 mr-2" />
+                        Give Interview
+                      </Button>
+                    </Link>
+                    <Link href="/dashboard/interview-select">
+                      <Button variant="outline" className="w-full bg-black/20 border-blue-600 text-blue-400 hover:text-white">
+                        <Target className="w-4 h-4 mr-2" />
+                        Take Interview
+                      </Button>
+                    </Link>
+                    <Link href="/dashboard/settings">
+                      <Button variant="outline" className="w-full bg-black/20 border-yellow-600 text-yellow-400 hover:text-white">
                         <Settings className="w-4 h-4 mr-2" />
                         Settings
                       </Button>
                     </Link>
                     <Link href="/dashboard/rankings">
-                      <Button variant="outline" className="w-full bg-black/20 border-blue-600 text-blue-400 hover:text-white">
+                      <Button variant="outline" className="w-full bg-black/20 border-purple-600 text-purple-400 hover:text-white">
                         <BarChart3 className="w-4 h-4 mr-2" />
                         Rankings
                       </Button>
                     </Link>
                     <Link href="/dashboard/feedback">
-                      <Button variant="outline" className="w-full bg-black/20 border-purple-600 text-purple-400 hover:text-white">
+                      <Button variant="outline" className="w-full bg-black/20 border-indigo-600 text-indigo-400 hover:text-white">
                         <MessageSquare className="w-4 h-4 mr-2" />
                         Feedback
                       </Button>

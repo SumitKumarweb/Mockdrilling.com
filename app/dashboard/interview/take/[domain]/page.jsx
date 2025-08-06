@@ -34,12 +34,14 @@ import {
   AlertCircle,
 } from "lucide-react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 
 export default function TakeInterviewPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const domain = params.domain
+  const interviewType = searchParams.get('type') || 'take'
   const { user, updateInterviewCounts } = useAuth()
   const [timeLeft, setTimeLeft] = useState(45 * 60) // 45 minutes
   const [isRecording, setIsRecording] = useState(false)
@@ -392,7 +394,7 @@ export default App;`,
           language,
           responses: interviewData.responses,
           userId: user?.uid,
-          interviewType: 'take',
+          interviewType: interviewType,
           domain: domain,
         }),
       })
@@ -407,13 +409,13 @@ export default App;`,
         
         // Update interview counts locally
         if (user?.uid) {
-          await updateInterviewCounts('take', 1)
+          await updateInterviewCounts(interviewType, 1)
           console.log('Interview count updated locally')
         }
       }
 
       // Redirect to results
-      window.location.href = `/dashboard/interview/results?sessionId=${interviewData.sessionId}`
+      window.location.href = `/dashboard/interview/results?sessionId=${interviewData.sessionId}&type=${interviewType}`
     } catch (error) {
       console.error("Failed to submit interview:", error)
       setIsSubmitting(false)
@@ -430,8 +432,12 @@ export default App;`,
                 <Icon className={`w-6 h-6 text-${currentDomain.color}-400`} />
               </div>
               <div>
-                <CardTitle className="text-white font-mono text-2xl">{currentDomain.name} Interview</CardTitle>
-                <CardDescription className="text-gray-400 font-mono">Video call interview session</CardDescription>
+                <CardTitle className="text-white font-mono text-2xl">
+                  {currentDomain.name} {interviewType === 'give' ? 'Interviewer' : 'Interview'}
+                </CardTitle>
+                <CardDescription className="text-gray-400 font-mono">
+                  {interviewType === 'give' ? 'Conduct an interview' : 'Video call interview session'}
+                </CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -439,7 +445,10 @@ export default App;`,
             <Alert className="bg-blue-500/10 border-blue-500/30 text-blue-400">
               <Video className="h-4 w-4" />
               <AlertDescription className="font-mono">
-                This interview requires camera and microphone access for video calling with your interviewer.
+                {interviewType === 'give' 
+                  ? 'This interview requires camera and microphone access for video calling with your interviewee.'
+                  : 'This interview requires camera and microphone access for video calling with your interviewer.'
+                }
               </AlertDescription>
             </Alert>
 
@@ -470,7 +479,7 @@ export default App;`,
               className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-black font-mono font-bold text-lg py-6"
             >
               <Video className="w-5 h-5 mr-2" />
-              Grant Permissions & Start Interview
+              Grant Permissions & Start {interviewType === 'give' ? 'Conducting' : 'Interview'}
             </Button>
 
             <div className="text-center">
