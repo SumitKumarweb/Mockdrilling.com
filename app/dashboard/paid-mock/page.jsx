@@ -130,7 +130,7 @@ export default function PaidMockPage() {
     // Simulate booking process
     await new Promise(resolve => setTimeout(resolve, 2000))
     setBookingStep(5)
-    setIsBooking(false)
+      setIsBooking(false)
   }
 
   const canProceedToNext = () => {
@@ -165,41 +165,41 @@ export default function PaidMockPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
-        {/* Header */}
-        <header className="border-b border-green-500/20 bg-black/40 backdrop-blur-xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
+      {/* Header */}
+      <header className="border-b border-green-500/20 bg-black/40 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
                 <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">
                   <ArrowLeft className="w-5 h-5" />
-                </Link>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
-                    <Terminal className="w-5 h-5 text-black" />
-                  </div>
-                  <span className="text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent font-mono">
-                    MockDrilling
-                  </span>
+              </Link>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
+                  <Terminal className="w-5 h-5 text-black" />
                 </div>
-                <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-mono">
-                  Professional Mock
-                </Badge>
+                <span className="text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent font-mono">
+                  MockDrilling
+                </span>
               </div>
+              <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-mono">
+                Professional Mock
+              </Badge>
+            </div>
 
               <div className="flex items-center space-x-2 bg-black/60 rounded-lg px-3 py-2 border border-green-500/30">
                 <Crown className="w-4 h-4 text-yellow-400" />
                 <span className="text-green-400 font-mono font-bold">₹{getTotalPrice()}</span>
                 <span className="text-gray-400 text-sm font-mono">Professional</span>
               </div>
-            </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
               {/* Step Indicator */}
               <Card className="bg-black/40 border-purple-500/20 backdrop-blur-xl">
                 <CardHeader>
@@ -207,44 +207,44 @@ export default function PaidMockPage() {
                     <Target className="w-5 h-5 mr-2 text-purple-400" />
                     Booking Progress
                   </CardTitle>
-                </CardHeader>
-                <CardContent>
+              </CardHeader>
+              <CardContent>
                   <div className="space-y-4">
-                    {[
-                      { step: 1, title: "Interview Focus", completed: bookingStep > 1 },
-                      { step: 2, title: "Choose Expert", completed: bookingStep > 2 },
-                      { step: 3, title: "Schedule", completed: bookingStep > 3 },
-                      { step: 4, title: "Your Details", completed: bookingStep > 4 },
-                      { step: 5, title: "Confirmation", completed: bookingStep > 5 },
-                    ].map((item) => (
-                      <div key={item.step} className="flex items-center space-x-3">
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            item.completed
-                              ? "bg-green-500 text-black"
-                              : bookingStep === item.step
-                                ? "bg-purple-500 text-white"
-                                : "bg-gray-600 text-gray-400"
-                          }`}
-                        >
-                          {item.completed ? (
-                            <CheckCircle className="w-4 h-4" />
-                          ) : (
-                            <span className="font-mono text-sm">{item.step}</span>
-                          )}
-                        </div>
-                        <span
-                          className={`font-mono text-sm ${
-                            item.completed || bookingStep === item.step ? "text-white" : "text-gray-400"
-                          }`}
-                        >
-                          {item.title}
-                        </span>
+                  {[
+                    { step: 1, title: "Interview Focus", completed: bookingStep > 1 },
+                    { step: 2, title: "Choose Expert", completed: bookingStep > 2 },
+                    { step: 3, title: "Schedule", completed: bookingStep > 3 },
+                    { step: 4, title: "Your Details", completed: bookingStep > 4 },
+                    { step: 5, title: "Confirmation", completed: bookingStep > 5 },
+                  ].map((item) => (
+                    <div key={item.step} className="flex items-center space-x-3">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          item.completed
+                            ? "bg-green-500 text-black"
+                            : bookingStep === item.step
+                              ? "bg-purple-500 text-white"
+                              : "bg-gray-600 text-gray-400"
+                        }`}
+                      >
+                        {item.completed ? (
+                          <CheckCircle className="w-4 h-4" />
+                        ) : (
+                          <span className="font-mono text-sm">{item.step}</span>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      <span
+                        className={`font-mono text-sm ${
+                          item.completed || bookingStep === item.step ? "text-white" : "text-gray-400"
+                        }`}
+                      >
+                        {item.title}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
               {/* Step 1: Interview Focus */}
               {bookingStep === 1 && (
@@ -650,68 +650,68 @@ export default function PaidMockPage() {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              {/* Selected Expert Preview */}
-              {selectedExpertData && (
-                <Card className="bg-black/40 border-green-500/20 backdrop-blur-xl">
-                  <CardHeader>
-                    <CardTitle className="text-white font-mono">Selected Expert</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-3 mb-3">
-                      <img
-                        src={selectedExpertData.avatar}
-                        alt={selectedExpertData.name}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-green-500/30"
-                      />
-                      <div>
-                        <h4 className="text-white font-mono font-bold">{selectedExpertData.name}</h4>
-                        <p className="text-gray-400 font-mono text-sm">{selectedExpertData.company}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                        <span className="text-yellow-400 font-mono text-sm">{selectedExpertData.rating}</span>
-                      </div>
-                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30 font-mono">
-                        ₹{selectedExpertData.price}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Why Professional Mock? */}
-              <Card className="bg-black/40 border-blue-500/20 backdrop-blur-xl">
+            {/* Selected Expert Preview */}
+            {selectedExpertData && (
+              <Card className="bg-black/40 border-green-500/20 backdrop-blur-xl">
                 <CardHeader>
-                  <CardTitle className="text-white font-mono flex items-center">
-                    <Crown className="w-5 h-5 mr-2 text-yellow-400" />
-                    Why Professional Mock?
-                  </CardTitle>
+                  <CardTitle className="text-white font-mono">Selected Expert</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-start space-x-2">
-                    <Zap className="w-4 h-4 text-blue-400 mt-0.5" />
-                    <span className="text-gray-300 font-mono text-sm">Industry expert feedback</span>
+                <CardContent>
+                  <div className="flex items-center space-x-3 mb-3">
+                    <img
+                        src={selectedExpertData.avatar}
+                      alt={selectedExpertData.name}
+                      className="w-12 h-12 rounded-full object-cover border-2 border-green-500/30"
+                    />
+                    <div>
+                      <h4 className="text-white font-mono font-bold">{selectedExpertData.name}</h4>
+                      <p className="text-gray-400 font-mono text-sm">{selectedExpertData.company}</p>
+                    </div>
                   </div>
-                  <div className="flex items-start space-x-2">
-                    <Video className="w-4 h-4 text-green-400 mt-0.5" />
-                    <span className="text-gray-300 font-mono text-sm">Real interview experience</span>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <MessageSquare className="w-4 h-4 text-purple-400 mt-0.5" />
-                    <span className="text-gray-300 font-mono text-sm">Detailed performance report</span>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <Award className="w-4 h-4 text-orange-400 mt-0.5" />
-                    <span className="text-gray-300 font-mono text-sm">Bonus drill points</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                      <span className="text-yellow-400 font-mono text-sm">{selectedExpertData.rating}</span>
+                    </div>
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 font-mono">
+                      ₹{selectedExpertData.price}
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>
-            </div>
+            )}
+
+            {/* Why Professional Mock? */}
+            <Card className="bg-black/40 border-blue-500/20 backdrop-blur-xl">
+              <CardHeader>
+                <CardTitle className="text-white font-mono flex items-center">
+                  <Crown className="w-5 h-5 mr-2 text-yellow-400" />
+                  Why Professional Mock?
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-start space-x-2">
+                  <Zap className="w-4 h-4 text-blue-400 mt-0.5" />
+                  <span className="text-gray-300 font-mono text-sm">Industry expert feedback</span>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <Video className="w-4 h-4 text-green-400 mt-0.5" />
+                  <span className="text-gray-300 font-mono text-sm">Real interview experience</span>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <MessageSquare className="w-4 h-4 text-purple-400 mt-0.5" />
+                  <span className="text-gray-300 font-mono text-sm">Detailed performance report</span>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <Award className="w-4 h-4 text-orange-400 mt-0.5" />
+                  <span className="text-gray-300 font-mono text-sm">Bonus drill points</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
+    </div>
     </ProtectedRoute>
   )
 }

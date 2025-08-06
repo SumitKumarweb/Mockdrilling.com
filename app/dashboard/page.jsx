@@ -65,6 +65,10 @@ export default function Dashboard() {
     interviewsTaken: userProfile?.interviewsTaken || 0,
     successRate: 78, // This could be calculated from actual interview data
     avgScore: 85, // This could be calculated from actual interview data
+    // Domain-specific stats
+    frontendInterviews: userProfile?.domainStats?.frontend || 0,
+    backendInterviews: userProfile?.domainStats?.backend || 0,
+    dsaInterviews: userProfile?.domainStats?.dsa || 0,
   }
 
 
@@ -110,7 +114,7 @@ export default function Dashboard() {
         try {
           console.log('Fetching rankings for user:', authUser.uid)
           setLoadingRankings(true)
-          const response = await fetch(`/api/rankings?userId=${authUser.uid}&limit=10`)
+          const response = await fetch(`/api/rankings?userId=${authUser.uid}&limit=3`)
           const data = await response.json()
           
           console.log('Rankings API response:', data)
@@ -185,113 +189,157 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
-        {/* Header */}
-        <header className="border-b border-green-500/20 bg-black/40 backdrop-blur-xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
-                    <Terminal className="w-5 h-5 text-black" />
-                  </div>
-                  <span className="text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent font-mono">
-                    MockDrilling
-                  </span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
+      {/* Header */}
+      <header className="border-b border-green-500/20 bg-black/40 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
+                  <Terminal className="w-5 h-5 text-black" />
                 </div>
-                <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 font-mono">
-                  Dashboard
-                </Badge>
+                <span className="text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent font-mono">
+                  MockDrilling
+                </span>
               </div>
+              <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30 font-mono">
+                Dashboard
+              </Badge>
+            </div>
 
-              <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4">
                 <div 
                   className="flex items-center space-x-2 bg-black/60 rounded-lg px-3 py-2 border border-green-500/30 cursor-pointer hover:bg-black/80 transition-colors"
                   onClick={() => setShowDrillPointsModal(true)}
                 >
-                  <Coins className="w-4 h-4 text-yellow-400" />
-                  <span className="text-green-400 font-mono font-bold">{user.drillPoints}</span>
-                  <span className="text-gray-400 text-sm font-mono">DP</span>
-                </div>
-                <Link href="/dashboard/settings">
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                    <Settings className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-400 hover:text-white"
+                <Coins className="w-4 h-4 text-yellow-400" />
+                <span className="text-green-400 font-mono font-bold">{user.drillPoints}</span>
+                <span className="text-gray-400 text-sm font-mono">DP</span>
+              </div>
+              <Link href="/dashboard/settings">
+                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-white"
                   onClick={async () => {
                     await logout()
-                  }}
-                >
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </div>
+                }}
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white font-mono mb-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white font-mono mb-2">
               Welcome back, {user.name}! 👋
-            </h1>
+          </h1>
             <p className="text-gray-400 font-mono">
               Ready to level up your interview skills? Let's get started.
             </p>
-          </div>
+        </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Quick Stats */}
+              <Card className="bg-black/40 border-purple-500/20 backdrop-blur-xl">
+                <CardHeader>
+                  <CardTitle className="text-white font-mono flex items-center">
+                    <BarChart3 className="w-5 h-5 mr-2 text-purple-400" />
+                    Quick Stats
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                      <div className="text-2xl font-bold text-purple-400">{stats.totalInterviews}</div>
+                      <div className="text-xs text-gray-400 font-mono">Total Interviews</div>
+                    </div>
+                    <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                      <div className="text-2xl font-bold text-blue-400">{stats.frontendInterviews}</div>
+                      <div className="text-xs text-gray-400 font-mono">Frontend</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                      <div className="text-2xl font-bold text-green-400">{stats.backendInterviews}</div>
+                      <div className="text-xs text-gray-400 font-mono">Backend</div>
+                    </div>
+                    <div className="text-center p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                      <div className="text-2xl font-bold text-yellow-400">{stats.dsaInterviews}</div>
+                      <div className="text-xs text-gray-400 font-mono">DSA</div>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="text-center p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                      <div className="text-xl font-bold text-red-400">{stats.interviewsTaken}</div>
+                      <div className="text-xs text-gray-400 font-mono">Taken</div>
+                    </div>
+                    <div className="text-center p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                      <div className="text-xl font-bold text-emerald-400">{stats.interviewsGiven}</div>
+                      <div className="text-xs text-gray-400 font-mono">Given</div>
+                    </div>
+                    <div className="text-center p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                      <div className="text-xl font-bold text-orange-400">{userProfile?.currentStreak || 0}</div>
+                      <div className="text-xs text-gray-400 font-mono">Day Streak</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Quick Actions */}
               <div className="grid md:grid-cols-2 gap-4">
                 <Link href="/dashboard/interview-select">
                   <Card className="bg-black/40 border-green-500/20 backdrop-blur-xl hover:border-green-500/40 transition-all cursor-pointer group">
-                    <CardContent className="p-6">
+            <CardContent className="p-6">
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
                           <Target className="w-6 h-6 text-green-400" />
                         </div>
-                        <div>
+                <div>
                           <h3 className="text-white font-mono font-bold">Take Interview</h3>
                           <p className="text-gray-400 font-mono text-sm">Practice with AI interviewer</p>
-                        </div>
+                </div>
                         <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-green-400 transition-colors ml-auto" />
-                      </div>
-                    </CardContent>
-                  </Card>
+              </div>
+            </CardContent>
+          </Card>
                 </Link>
 
                 <Link href="/dashboard/paid-mock">
                   <Card className="bg-black/40 border-purple-500/20 backdrop-blur-xl hover:border-purple-500/40 transition-all cursor-pointer group">
-                    <CardContent className="p-6">
+            <CardContent className="p-6">
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
                           <Trophy className="w-6 h-6 text-purple-400" />
-                        </div>
-                        <div>
+              </div>
+                <div>
                           <h3 className="text-white font-mono font-bold">Professional Mock</h3>
                           <p className="text-gray-400 font-mono text-sm">Expert feedback & coaching</p>
-                        </div>
+                </div>
                         <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors ml-auto" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
               </div>
+            </CardContent>
+          </Card>
+                </Link>
+        </div>
 
               {/* Stats Overview */}
               <Card className="bg-black/40 border-blue-500/20 backdrop-blur-xl">
-                <CardHeader>
-                  <CardTitle className="text-white font-mono flex items-center">
+              <CardHeader>
+                <CardTitle className="text-white font-mono flex items-center">
                     <TrendingUp className="w-5 h-5 mr-2 text-blue-400" />
                     Your Progress
-                  </CardTitle>
-                </CardHeader>
+                </CardTitle>
+              </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
@@ -309,18 +357,18 @@ export default function Dashboard() {
                     <div className="text-center">
                       <div className="text-2xl font-bold text-yellow-400 font-mono">{stats.successRate}%</div>
                       <div className="text-gray-400 font-mono text-sm">Success Rate</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Recent Activity */}
-              <Card className="bg-black/40 border-gray-500/20 backdrop-blur-xl">
-                <CardHeader>
+            {/* Recent Activity */}
+            <Card className="bg-black/40 border-gray-500/20 backdrop-blur-xl">
+              <CardHeader>
                                     <CardTitle className="text-white font-mono flex items-center justify-between">
                     <div className="flex items-center">
-                      <History className="w-5 h-5 mr-2 text-gray-400" />
-                      Recent Activity
+                  <History className="w-5 h-5 mr-2 text-gray-400" />
+                  Recent Activity
                     </div>
                     {authUser?.uid && (
                       <Button
@@ -347,14 +395,14 @@ export default function Dashboard() {
                         Refresh
                       </Button>
                     )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                   {loadingActivities ? (
-                    <div className="space-y-4">
+                <div className="space-y-4">
                       {[1, 2, 3].map((i) => (
                         <div key={i} className="flex items-center justify-between p-3 bg-black/20 rounded-lg animate-pulse">
-                          <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 rounded-full bg-gray-600/20"></div>
                             <div>
                               <div className="h-4 bg-gray-600/20 rounded w-32 mb-2"></div>
@@ -378,9 +426,9 @@ export default function Dashboard() {
                               ) : (
                                 <Users className="w-4 h-4 text-green-400" />
                               )}
-                            </div>
-                            <div>
-                              <p className="text-white font-mono text-sm">
+                        </div>
+                        <div>
+                          <p className="text-white font-mono text-sm">
                                 {activity.interviewType === "take" ? "Took" : "Gave"} {activity.domain} interview
                               </p>
                               <p className="text-gray-400 font-mono text-xs">{activity.formattedDate}</p>
@@ -469,8 +517,8 @@ export default function Dashboard() {
                             +{achievements.length - 3} more achievements
                           </p>
                         </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
                   ) : (
                     <div className="text-center py-8">
                       <Award className="w-12 h-12 text-gray-500 mx-auto mb-4" />
@@ -478,18 +526,18 @@ export default function Dashboard() {
                       <p className="text-gray-600 font-mono text-sm">Complete interviews and earn drill points to unlock achievements!</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            </div>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
+          {/* Sidebar */}
+          <div className="space-y-6">
               {/* User Profile */}
               <Card className="bg-black/40 border-green-500/20 backdrop-blur-xl">
-                <CardHeader>
+              <CardHeader>
                   <CardTitle className="text-white font-mono">Profile</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              </CardHeader>
+              <CardContent className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <img
                       src={userProfile?.profilePhoto || "/placeholder.svg"}
@@ -499,7 +547,7 @@ export default function Dashboard() {
                     <div>
                       <h3 className="text-white font-mono font-bold">{user.name}</h3>
                       <p className="text-gray-400 font-mono text-sm">{user.email}</p>
-                    </div>
+                </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
@@ -515,17 +563,17 @@ export default function Dashboard() {
                       <span className="text-white font-mono text-sm">{stats.avgScore}%</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+              </CardContent>
+            </Card>
 
               {/* Drill Points */}
               <Card className="bg-black/40 border-yellow-500/20 backdrop-blur-xl">
-                <CardHeader>
-                  <CardTitle className="text-white font-mono flex items-center">
+              <CardHeader>
+                <CardTitle className="text-white font-mono flex items-center">
                     <Coins className="w-5 h-5 mr-2 text-yellow-400" />
                     Drill Points
-                  </CardTitle>
-                </CardHeader>
+                </CardTitle>
+              </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
@@ -543,9 +591,9 @@ export default function Dashboard() {
                       <div className="flex justify-between text-xs">
                         <span className="text-gray-400 font-mono">Next Level</span>
                         <span className="text-gray-400 font-mono">2000 DP</span>
-                      </div>
-                      <Progress value={65} className="h-2" />
-                    </div>
+                  </div>
+                  <Progress value={65} className="h-2" />
+                </div>
                   </div>
                 </CardContent>
               </Card>
@@ -576,9 +624,9 @@ export default function Dashboard() {
                       <span className="text-gray-400 font-mono text-sm">DSA</span>
                     </div>
                     <span className="text-white font-mono text-sm">9 interviews</span>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
 
               {/* Rankings Section */}
               <Card className="bg-black/40 border-yellow-500/20 backdrop-blur-xl">
@@ -596,7 +644,7 @@ export default function Dashboard() {
                           onClick={async () => {
                             try {
                               setLoadingRankings(true)
-                              const response = await fetch(`/api/rankings?userId=${authUser.uid}&limit=10`)
+                              const response = await fetch(`/api/rankings?userId=${authUser.uid}&limit=3`)
                               const data = await response.json()
                               if (data.success) {
                                 setRankings(data.rankings)
@@ -642,51 +690,51 @@ export default function Dashboard() {
                     </div>
                   ) : rankings.length > 0 ? (
                     <div className="space-y-3">
-                      {/* Top 3 Rankings */}
+                      {/* Top 3 Rankings with special styling */}
                       {rankings.slice(0, 3).map((ranking, index) => {
-                        const colors = [
-                          { bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', text: 'text-yellow-400' },
-                          { bg: 'bg-gray-500/10', border: 'border-gray-500/20', text: 'text-gray-400' },
-                          { bg: 'bg-orange-500/10', border: 'border-orange-500/20', text: 'text-orange-400' }
+                        const rankColors = [
+                          { bg: 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20', border: 'border-yellow-500/40', text: 'text-yellow-400', rankIcon: '🥇' },
+                          { bg: 'bg-gradient-to-r from-gray-500/20 to-gray-600/20', border: 'border-gray-500/40', text: 'text-gray-400', rankIcon: '🥈' },
+                          { bg: 'bg-gradient-to-r from-orange-500/20 to-orange-600/20', border: 'border-orange-500/40', text: 'text-orange-400', rankIcon: '🥉' }
                         ]
-                        const color = colors[index] || colors[0]
+                        const color = rankColors[index] || rankColors[0]
                         
                         return (
                           <Link href={`/profile/${ranking.userId}`} key={ranking.userId}>
-                            <div className={`flex items-center justify-between p-3 ${color.bg} rounded-lg border ${color.border} hover:bg-black/40 transition-colors cursor-pointer`}>
+                            <div className={`flex items-center justify-between p-4 ${color.bg} rounded-lg border ${color.border} hover:bg-black/40 transition-all cursor-pointer group`}>
                               <div className="flex items-center space-x-3">
-                                <div className={`w-8 h-8 ${color.bg} rounded-full flex items-center justify-center`}>
-                                  <span className={`${color.text} font-bold text-sm`}>{ranking.rank}</span>
+                                <div className={`w-10 h-10 ${color.bg} rounded-full flex items-center justify-center border ${color.border}`}>
+                                  <span className="text-lg">{color.rankIcon}</span>
                                 </div>
                                 <div>
-                                  <p className="text-white font-mono text-sm">{ranking.name}</p>
+                                  <p className="text-white font-mono font-bold">{ranking.name}</p>
                                   <p className="text-gray-400 font-mono text-xs">{ranking.level}</p>
                                 </div>
                               </div>
-                                                          <div className="text-right">
-                              <p className={`${color.text} font-mono text-sm font-bold`}>{ranking.drillPoints} DP</p>
-                              <p className="text-gray-400 font-mono text-xs">{ranking.totalInterviews} interviews</p>
-                              {ranking.averageRating > 0 && (
-                                <div className="flex items-center justify-end space-x-1 mt-1">
-                                  <Star className="w-3 h-3 text-yellow-400" />
-                                  <span className="text-yellow-400 font-mono text-xs">
-                                    {ranking.averageRating}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
+                              <div className="text-right">
+                                <p className={`${color.text} font-mono font-bold text-lg`}>{ranking.drillPoints} DP</p>
+                                <p className="text-gray-400 font-mono text-xs">{ranking.totalInterviews} interviews</p>
+                                {ranking.averageRating > 0 && (
+                                  <div className="flex items-center justify-end space-x-1 mt-1">
+                                    <Star className="w-3 h-3 text-yellow-400" />
+                                    <span className="text-yellow-400 font-mono text-xs">
+                                      {ranking.averageRating}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </Link>
                         )
                       })}
 
-                      {/* Your Position */}
-                      {userRank && (
-                        <div className="mt-4 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                          <div className="flex items-center justify-between">
+                      {/* Your Position - only show if not in top 3 */}
+                      {userRank && userRank.rank > 3 && (
+                        <div className="mt-4 pt-4 border-t border-gray-700">
+                          <div className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/30">
                             <div className="flex items-center space-x-3">
                               <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
-                                <span className="text-green-400 font-bold text-sm">{userRank.rank}</span>
+                                <span className="text-green-400 font-bold text-sm">#{userRank.rank}</span>
                               </div>
                               <div>
                                 <p className="text-white font-mono text-sm">Your Position</p>
@@ -712,14 +760,14 @@ export default function Dashboard() {
               </Card>
 
                             {/* Performance Insights */}
-              <Card className="bg-black/40 border-purple-500/20 backdrop-blur-xl">
-                <CardHeader>
-                  <CardTitle className="text-white font-mono flex items-center">
+            <Card className="bg-black/40 border-purple-500/20 backdrop-blur-xl">
+              <CardHeader>
+                <CardTitle className="text-white font-mono flex items-center">
                     <TrendingUp className="w-5 h-5 mr-2 text-purple-400" />
                     Performance Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
                       <div className="text-2xl font-bold text-purple-400">{user.averageScore || 0}</div>
@@ -806,20 +854,20 @@ export default function Dashboard() {
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400 font-mono text-sm">Level</span>
                       <span className="text-yellow-400 font-mono font-bold">{user.level}</span>
-                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
+      </div>
 
         {/* Drill Points Modal */}
         <DrillPointsModal
           isOpen={showDrillPointsModal}
           onClose={() => setShowDrillPointsModal(false)}
         />
-      </div>
+    </div>
     </ProtectedRoute>
   )
 }

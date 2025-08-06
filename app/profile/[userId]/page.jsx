@@ -38,7 +38,7 @@ export default function UserProfilePage() {
   const params = useParams()
   const userId = params.userId
   const { user: authUser } = useAuth()
-  
+
   const [userProfile, setUserProfile] = useState(null)
   const [recentActivities, setRecentActivities] = useState([])
   const [loading, setLoading] = useState(true)
@@ -53,7 +53,7 @@ export default function UserProfilePage() {
       if (!userId) return
       
       try {
-        setLoading(true)
+      setLoading(true)
         const response = await fetch(`/api/profile/${userId}`)
         const data = await response.json()
         
@@ -67,7 +67,7 @@ export default function UserProfilePage() {
       } catch (error) {
         console.error('Error fetching user profile:', error)
       } finally {
-        setLoading(false)
+      setLoading(false)
       }
     }
 
@@ -225,14 +225,14 @@ export default function UserProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+      {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <Link href="/dashboard">
+              <Link href="/dashboard">
             <Button variant="outline" className="bg-black/20 border-gray-600 text-gray-300 hover:text-white">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
-            </Button>
-          </Link>
+                </Button>
+              </Link>
           {userRank && (
             <Badge className={`${levelInfo.bg} ${levelInfo.color} border-0`}>
               <Trophy className="w-4 h-4 mr-1" />
@@ -278,25 +278,44 @@ export default function UserProfilePage() {
                     <div className="flex items-center">
                       <Coins className="w-5 h-5 text-yellow-400 mr-2" />
                       <span className="text-gray-300">Drill Points</span>
-                    </div>
+              </div>
                     <span className="text-yellow-400 font-bold">{userProfile.drillPoints || 0}</span>
-                  </div>
-                  
+            </div>
+
                   <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
                     <div className="flex items-center">
                       <Target className="w-5 h-5 text-blue-400 mr-2" />
                       <span className="text-gray-300">Interviews Taken</span>
                     </div>
                     <span className="text-blue-400 font-bold">{userProfile.interviewsTaken || 0}</span>
-                  </div>
+            </div>
                   
                   <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
                     <div className="flex items-center">
                       <Users className="w-5 h-5 text-green-400 mr-2" />
                       <span className="text-gray-300">Interviews Given</span>
-                    </div>
+          </div>
                     <span className="text-green-400 font-bold">{userProfile.interviewsGiven || 0}</span>
+        </div>
+
+                  {/* Streak Information */}
+                  <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
+                    <div className="flex items-center">
+                      <TrendingUp className="w-5 h-5 text-orange-400 mr-2" />
+                      <span className="text-gray-300">Current Streak</span>
+                    </div>
+                    <span className="text-orange-400 font-bold">{userProfile.currentStreak || 0} days</span>
                   </div>
+
+                  {userProfile.longestStreak && userProfile.longestStreak > (userProfile.currentStreak || 0) && (
+                    <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
+                      <div className="flex items-center">
+                        <Crown className="w-5 h-5 text-purple-400 mr-2" />
+                        <span className="text-gray-300">Longest Streak</span>
+                      </div>
+                      <span className="text-purple-400 font-bold">{userProfile.longestStreak} days</span>
+                    </div>
+                  )}
                   
                   {/* Feedback Stats */}
                   {userProfile.feedbackStats && (
@@ -305,7 +324,7 @@ export default function UserProfilePage() {
                         <div className="flex items-center">
                           <Star className="w-5 h-5 text-yellow-400 mr-2" />
                           <span className="text-gray-300">Avg Rating</span>
-                        </div>
+                      </div>
                         <span className="text-yellow-400 font-bold">
                           {userProfile.feedbackStats.averageRating?.toFixed(1) || 'N/A'}
                         </span>
@@ -315,12 +334,12 @@ export default function UserProfilePage() {
                         <div className="flex items-center">
                           <Target className="w-5 h-5 text-blue-400 mr-2" />
                           <span className="text-gray-300">Total Feedback</span>
-                        </div>
+                    </div>
                         <span className="text-blue-400 font-bold">{userProfile.feedbackStats.totalFeedback || 0}</span>
                       </div>
                     </>
                   )}
-                </div>
+                    </div>
 
                 {/* Level Progress */}
                 <div className="mt-6">
@@ -364,6 +383,20 @@ export default function UserProfilePage() {
                     </div>
                     <div className="text-xs text-gray-400 font-mono">Avg Rating</div>
                   </div>
+                  <div className="text-center p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                    <div className="text-2xl font-bold text-orange-400">
+                      {userProfile.currentStreak || 0}
+                    </div>
+                    <div className="text-xs text-gray-400 font-mono">Current Streak</div>
+                  </div>
+                  {userProfile.longestStreak && userProfile.longestStreak > (userProfile.currentStreak || 0) && (
+                    <div className="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                      <div className="text-2xl font-bold text-purple-400">
+                        {userProfile.longestStreak}
+                      </div>
+                      <div className="text-xs text-gray-400 font-mono">Longest Streak</div>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Additional Stats */}
@@ -450,10 +483,10 @@ export default function UserProfilePage() {
                                   <p className="text-gray-500 font-mono text-xs mt-1">
                                     {new Date(achievement.unlockedAt).toLocaleDateString()}
                                   </p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
                         </div>
                       )
                     })}
@@ -495,7 +528,7 @@ export default function UserProfilePage() {
                   <div className="text-center py-8">
                     <Target className="w-12 h-12 text-gray-500 mx-auto mb-4" />
                     <p className="text-gray-400">No domain expertise data available</p>
-                  </div>
+                </div>
                 )}
               </CardContent>
             </Card>
@@ -515,7 +548,7 @@ export default function UserProfilePage() {
                       <div key={i} className="animate-pulse">
                         <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
                         <div className="h-3 bg-gray-700 rounded w-1/2"></div>
-                      </div>
+                </div>
                     ))}
                   </div>
                 ) : recentActivities.length > 0 ? (
@@ -532,11 +565,11 @@ export default function UserProfilePage() {
                             </p>
                             <p className="text-gray-400 text-xs">{activity.formattedDate}</p>
                           </div>
-                        </div>
+                  </div>
                         <Badge variant="outline" className="text-xs">
                           {activity.type === 'take' ? '-120' : '+100'} DP
                         </Badge>
-                      </div>
+                  </div>
                     ))}
                   </div>
                 ) : (
@@ -551,12 +584,12 @@ export default function UserProfilePage() {
             {/* Feedback Details */}
             {userProfile.feedbackStats && userProfile.feedbackStats.totalFeedback > 0 && (
               <Card className="bg-black/40 border-orange-500/20 backdrop-blur-xl">
-                <CardHeader>
+              <CardHeader>
                   <CardTitle className="text-white font-mono flex items-center">
                     <MessageSquare className="w-5 h-5 mr-2 text-orange-400" />
                     Feedback Analysis
                   </CardTitle>
-                </CardHeader>
+              </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
@@ -661,12 +694,12 @@ export default function UserProfilePage() {
                         <div className="flex items-center space-x-2">
                           <Calendar className="w-4 h-4 text-gray-400" />
                           <span className="text-gray-300 text-sm">{userProfile.experience} years experience</span>
-                        </div>
+                  </div>
                       )}
-                    </div>
-                    
+                </div>
+
                     {userProfile.skills && userProfile.skills.length > 0 && (
-                      <div>
+                <div>
                         <h4 className="text-white font-semibold mb-2">Skills</h4>
                         <div className="flex flex-wrap gap-2">
                           {userProfile.skills.map((skill, index) => (
@@ -674,12 +707,12 @@ export default function UserProfilePage() {
                               {skill}
                             </Badge>
                           ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                    )}
+                </div>
+              </CardContent>
+            </Card>
             )}
           </div>
         </div>

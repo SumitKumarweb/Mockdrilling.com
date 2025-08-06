@@ -513,6 +513,32 @@ export function AuthProvider({ children }) {
       if (user) {
         // Load user profile when user is authenticated
         await loadUserProfile(user.uid)
+        
+        // Update daily streak
+        try {
+          const streakResponse = await fetch('/api/streak', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: user.uid
+            })
+          })
+          const streakResult = await streakResponse.json()
+          if (streakResult.success) {
+            console.log('Streak updated:', streakResult.streak)
+            // Update local user profile with streak data
+            setUserProfile(prev => prev ? {
+              ...prev,
+              currentStreak: streakResult.streak.current,
+              longestStreak: streakResult.streak.longest,
+              lastLoginDate: streakResult.streak.lastLogin
+            } : null)
+          }
+        } catch (streakError) {
+          console.error('Error updating streak:', streakError)
+        }
       } else {
         setUserProfile(null)
       }

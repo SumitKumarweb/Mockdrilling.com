@@ -44,7 +44,7 @@ export default function RankingsPage() {
     const fetchRankings = async () => {
       if (authUser?.uid) {
         try {
-          setLoading(true)
+      setLoading(true)
           const response = await fetch(`/api/rankings?userId=${authUser.uid}&limit=100`)
           const data = await response.json()
           
@@ -126,19 +126,19 @@ export default function RankingsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
-        {/* Header */}
-        <header className="border-b border-green-500/20 bg-black/40 backdrop-blur-xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-4">
-                <Link href="/dashboard">
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
+      {/* Header */}
+      <header className="border-b border-green-500/20 bg-black/40 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Dashboard
-                  </Button>
-                </Link>
-                <div className="flex items-center space-x-2">
+                </Button>
+              </Link>
+              <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
                     <Trophy className="w-5 h-5 text-black" />
                   </div>
@@ -147,31 +147,31 @@ export default function RankingsPage() {
                   </span>
                 </div>
                 <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 font-mono">
-                  Rankings
-                </Badge>
-              </div>
+                Rankings
+              </Badge>
+            </div>
 
-              <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2 bg-black/60 rounded-lg px-3 py-2 border border-green-500/30">
                   <Trophy className="w-4 h-4 text-yellow-400" />
                   <span className="text-green-400 font-mono font-bold">{userRank?.rank || 'N/A'}</span>
                   <span className="text-gray-400 text-sm font-mono">Rank</span>
                 </div>
               </div>
-            </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card className="bg-black/40 border-yellow-500/20 backdrop-blur-xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <div>
+                        <div>
                     <p className="text-gray-400 font-mono text-sm">Total Users</p>
                     <p className="text-2xl font-bold text-white">{stats.totalUsers}</p>
-                  </div>
+                        </div>
                   <Users className="w-8 h-8 text-yellow-400" />
                 </div>
               </CardContent>
@@ -217,7 +217,7 @@ export default function RankingsPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2">
                   <select
                     value={sortBy}
@@ -270,7 +270,7 @@ export default function RankingsPage() {
                     }`}
                   >
                   <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-black/20 border border-gray-600/20">
                           {getRankIcon(user.rank)}
@@ -305,8 +305,8 @@ export default function RankingsPage() {
                             )}
                           </div>
                         </div>
-                      </div>
-                      
+                </div>
+
                       <div className="text-right">
                         <div className="text-2xl font-bold text-yellow-400 font-mono">
                           {user.drillPoints} DP
@@ -315,9 +315,9 @@ export default function RankingsPage() {
                           Rank #{user.rank}
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                </div>
+              </CardContent>
+            </Card>
                 </Link>
               ))}
               
@@ -332,7 +332,7 @@ export default function RankingsPage() {
                   </CardContent>
                 </Card>
               )}
-            </div>
+          </div>
           )}
         </div>
       </div>

@@ -33,11 +33,21 @@ export async function POST(request) {
           const currentPoints = userData.drillPoints || 0
           const newPoints = Math.max(0, currentPoints + drillPointsChange)
           
+          // Update domain-specific stats
+          const currentDomainStats = userData.domainStats || {}
+          const domainKey = (domain || 'unknown').toLowerCase()
+          const currentDomainCount = currentDomainStats[domainKey] || 0
+          const newDomainStats = {
+            ...currentDomainStats,
+            [domainKey]: currentDomainCount + 1
+          }
+          
           // Update drill points
           await updateDoc(doc(db, 'users', userId), {
             drillPoints: newPoints,
             interviewsTaken: interviewType === 'take' ? (userData.interviewsTaken || 0) + 1 : userData.interviewsTaken || 0,
             interviewsGiven: interviewType === 'give' ? (userData.interviewsGiven || 0) + 1 : userData.interviewsGiven || 0,
+            domainStats: newDomainStats,
             updatedAt: new Date().toISOString(),
           })
           

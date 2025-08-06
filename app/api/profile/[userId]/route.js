@@ -45,6 +45,9 @@ export async function GET(request, { params }) {
       website: userData.website || "",
       // Feedback statistics
       feedbackStats: userData.feedbackStats || null,
+      // Streak information
+      currentStreak: userData.currentStreak || 0,
+      longestStreak: userData.longestStreak || 0,
     }
 
     console.log('User profile retrieved successfully:', userProfile.displayName)
