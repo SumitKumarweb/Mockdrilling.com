@@ -175,6 +175,26 @@ export function AuthProvider({ children }) {
         drillPoints: newPoints
       }))
 
+      // Calculate achievements for drill points earned
+      try {
+        const achievementResponse = await fetch('/api/achievements', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.uid,
+            action: 'drill_points_earned'
+          })
+        })
+        const achievementResult = await achievementResponse.json()
+        if (achievementResult.success && achievementResult.newAchievements.length > 0) {
+          console.log(`Awarded ${achievementResult.newAchievements.length} new achievements for drill points`)
+        }
+      } catch (achievementError) {
+        console.error('Error calculating achievements for drill points:', achievementError)
+      }
+
       return { success: true, newPoints, pointsChange }
     } catch (error) {
       console.error('Error updating drill points:', error)
@@ -225,6 +245,26 @@ export function AuthProvider({ children }) {
         interviewsTaken: userData.interviewsTaken,
         interviewsGiven: userData.interviewsGiven
       }))
+
+      // Calculate achievements for interview completion
+      try {
+        const achievementResponse = await fetch('/api/achievements', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.uid,
+            action: isTaken ? 'interview_taken' : 'interview_given'
+          })
+        })
+        const achievementResult = await achievementResponse.json()
+        if (achievementResult.success && achievementResult.newAchievements.length > 0) {
+          console.log(`Awarded ${achievementResult.newAchievements.length} new achievements for interview`)
+        }
+      } catch (achievementError) {
+        console.error('Error calculating achievements for interview:', achievementError)
+      }
 
       return { success: true }
     } catch (error) {

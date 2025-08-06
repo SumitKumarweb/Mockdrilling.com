@@ -40,8 +40,10 @@ export default function Dashboard() {
   const [loadingActivities, setLoadingActivities] = useState(true)
   const [rankings, setRankings] = useState([])
   const [loadingRankings, setLoadingRankings] = useState(true)
-  const [userRank, setUserRank] = useState(null)
-  const [showDrillPointsModal, setShowDrillPointsModal] = useState(false)
+                const [userRank, setUserRank] = useState(null)
+              const [showDrillPointsModal, setShowDrillPointsModal] = useState(false)
+              const [achievements, setAchievements] = useState([])
+              const [achievementsLoading, setAchievementsLoading] = useState(true)
   
   // Use userProfile data if available, otherwise fallback to auth user data
   const user = {
@@ -133,6 +135,27 @@ export default function Dashboard() {
 
     fetchRankings()
   }, [authUser?.uid])
+
+  // Fetch achievements
+  useEffect(() => {
+    const fetchAchievements = async () => {
+      if (authUser?.uid) {
+        try {
+          setAchievementsLoading(true)
+          const response = await fetch(`/api/achievements?userId=${authUser.uid}`)
+          const data = await response.json()
+          if (data.success) {
+            setAchievements(data.achievements || [])
+          }
+        } catch (error) {
+          console.error('Error fetching achievements:', error)
+        } finally {
+          setAchievementsLoading(false)
+        }
+      }
+    }
+    fetchAchievements()
+  }, [authUser?.uid, userProfile?.drillPoints, userProfile?.interviewsTaken, userProfile?.interviewsGiven, userProfile?.feedbackStats])
 
   // Refresh activities when user profile changes (after interview completion)
   useEffect(() => {
@@ -381,6 +404,78 @@ export default function Dashboard() {
                       <History className="w-12 h-12 text-gray-500 mx-auto mb-4" />
                       <p className="text-gray-400 font-mono">No recent activities</p>
                       <p className="text-gray-500 font-mono text-sm">Start taking or giving interviews to see your activity here</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Achievements */}
+              <Card className="bg-black/40 border-yellow-500/20 backdrop-blur-xl">
+                <CardHeader>
+                  <CardTitle className="text-white font-mono flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Award className="w-5 h-5 mr-2 text-yellow-400" />
+                      Recent Achievements
+                    </div>
+                    <Badge variant="outline" className="text-xs bg-yellow-500/10 border-yellow-500/30 text-yellow-400">
+                      {achievements.length} unlocked
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {achievementsLoading ? (
+                    <div className="space-y-3">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="flex items-center space-x-3 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20 animate-pulse">
+                          <div className="w-8 h-8 bg-gray-600 rounded"></div>
+                          <div className="flex-1">
+                            <div className="h-4 bg-gray-600 rounded mb-2"></div>
+                            <div className="h-3 bg-gray-700 rounded w-3/4"></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : achievements.length > 0 ? (
+                    <div className="space-y-3">
+                      {achievements.slice(0, 3).map((achievement, index) => (
+                        <div key={achievement.id} className={`flex items-center space-x-3 p-3 rounded-lg border transition-all hover:scale-105 ${
+                          achievement.rarity === 'legendary' ? 'bg-purple-500/10 border-purple-500/30' :
+                          achievement.rarity === 'epic' ? 'bg-blue-500/10 border-blue-500/30' :
+                          achievement.rarity === 'rare' ? 'bg-green-500/10 border-green-500/30' :
+                          achievement.rarity === 'uncommon' ? 'bg-yellow-500/10 border-yellow-500/30' :
+                          'bg-gray-500/10 border-gray-500/30'
+                        }`}>
+                          <div className="text-2xl">{achievement.icon}</div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-white font-mono text-sm font-bold">{achievement.name}</h4>
+                              <Badge variant="outline" className={`text-xs ${
+                                achievement.rarity === 'legendary' ? 'border-purple-500 text-purple-400' :
+                                achievement.rarity === 'epic' ? 'border-blue-500 text-blue-400' :
+                                achievement.rarity === 'rare' ? 'border-green-500 text-green-400' :
+                                achievement.rarity === 'uncommon' ? 'border-yellow-500 text-yellow-400' :
+                                'border-gray-500 text-gray-400'
+                              }`}>
+                                {achievement.rarity}
+                              </Badge>
+                            </div>
+                            <p className="text-gray-400 font-mono text-xs mt-1">{achievement.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                      {achievements.length > 3 && (
+                        <div className="text-center pt-2">
+                          <p className="text-gray-500 font-mono text-sm">
+                            +{achievements.length - 3} more achievements
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Award className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                      <p className="text-gray-500 font-mono">No achievements yet</p>
+                      <p className="text-gray-600 font-mono text-sm">Complete interviews and earn drill points to unlock achievements!</p>
                     </div>
                   )}
                 </CardContent>

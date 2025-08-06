@@ -24,7 +24,7 @@ export async function GET(request, { params }) {
     // Format the user data for the profile page
     const userProfile = {
       uid: userId,
-      displayName: userData.displayName || "Anonymous User",
+      displayName: userData.name || "Anonymous",
       email: userData.email || "",
       photoURL: userData.photoURL || "",
       drillPoints: userData.drillPoints || 0,

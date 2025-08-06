@@ -119,7 +119,31 @@ export default function SettingsPage() {
       const success = await updateUserProfile(userData)
       
       if (success) {
-        setSaveStatus({ type: "success", message: "Settings saved successfully!" })
+        // Calculate achievements for profile update
+        try {
+          const achievementResponse = await fetch('/api/achievements', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: authUser.uid,
+              action: 'profile_updated'
+            })
+          })
+          const achievementResult = await achievementResponse.json()
+          if (achievementResult.success && achievementResult.newAchievements.length > 0) {
+            setSaveStatus({ 
+              type: "success", 
+              message: `Settings saved successfully! 🎉 ${achievementResult.newAchievements.length} new achievement${achievementResult.newAchievements.length > 1 ? 's' : ''} unlocked!` 
+            })
+          } else {
+            setSaveStatus({ type: "success", message: "Settings saved successfully!" })
+          }
+        } catch (achievementError) {
+          console.error('Error calculating achievements:', achievementError)
+          setSaveStatus({ type: "success", message: "Settings saved successfully!" })
+        }
         
         // Clear success message after 3 seconds
         setTimeout(() => {

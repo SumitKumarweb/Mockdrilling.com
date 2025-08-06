@@ -57,6 +57,29 @@ export async function POST(request) {
     // Update interviewee's feedback stats
     await updateUserFeedbackStats(intervieweeId, feedbackData)
 
+    // Calculate achievements for feedback received
+    try {
+      console.log('Calculating achievements for feedback received')
+      const achievementResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/achievements`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: intervieweeId,
+          action: 'feedback_received',
+          data: feedbackData
+        })
+      })
+      const achievementResult = await achievementResponse.json()
+      console.log('Achievement calculation result:', achievementResult)
+      if (achievementResult.success && achievementResult.newAchievements.length > 0) {
+        console.log(`Awarded ${achievementResult.newAchievements.length} new achievements for feedback`)
+      }
+    } catch (achievementError) {
+      console.error('Error calculating achievements for feedback:', achievementError)
+    }
+
     console.log('Feedback submitted successfully for session:', sessionId)
 
     return NextResponse.json({

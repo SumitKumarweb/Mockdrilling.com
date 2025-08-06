@@ -89,6 +89,28 @@ export async function POST(request) {
             activityStored = { success: false, error: activityError.message }
           }
         }
+
+        // Calculate achievements
+        try {
+          console.log('Calculating achievements for interview submission')
+          const achievementResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/achievements`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: userId,
+              action: interviewType === 'take' ? 'interview_taken' : 'interview_given'
+            })
+          })
+          const achievementResult = await achievementResponse.json()
+          console.log('Achievement calculation result:', achievementResult)
+          if (achievementResult.success && achievementResult.newAchievements.length > 0) {
+            console.log(`Awarded ${achievementResult.newAchievements.length} new achievements`)
+          }
+        } catch (achievementError) {
+          console.error('Error calculating achievements:', achievementError)
+        }
       } catch (firestoreError) {
         console.error('Error updating user drill points:', firestoreError)
         drillPointsUpdate = { success: false, error: firestoreError.message }
