@@ -360,7 +360,7 @@ export default function Dashboard() {
                           <Users className="w-6 h-6 text-green-400" />
                         </div>
                 <div>
-                          <h3 className="text-white font-mono font-bold">Give Interview</h3>
+                          <h3 className="text-white font-mono font-bold">Free Mock Interview</h3>
                           <p className="text-gray-400 font-mono text-sm">Conduct interviews for others</p>
                 </div>
                         <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-green-400 transition-colors ml-auto" />
