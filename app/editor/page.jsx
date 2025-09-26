@@ -282,6 +282,27 @@ console.log(solution());`)
                 <h1 className="text-lg font-semibold">Online Code Editor</h1>
                 <Badge variant="secondary">Live</Badge>
               </div>
+
+              <div className="flex items-center space-x-2">
+                  <Button
+                    size="sm"
+                    onClick={runCode}
+                    disabled={isRunning}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {isRunning ? (
+                      <>
+                        <Square className="w-4 h-4 mr-2" />
+                        Running...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4 mr-2" />
+                        Run Code
+                      </>
+                    )}
+                  </Button>
+                </div>
               <div className="flex items-center space-x-2">
                 <Select value={language} onValueChange={handleLanguageChange}>
                   <SelectTrigger className="w-32">
@@ -307,7 +328,6 @@ console.log(solution());`)
               </div>
             </div>
           </div>
-
           {/* Editor and Output */}
           <div className="flex-1 flex">
             {/* Code Editor */}
@@ -320,35 +340,8 @@ console.log(solution());`)
                   placeholder="Start coding your solution here..."
                 />
               </div>
-              
-              {/* Editor Footer */}
-              <div className="bg-muted/50 border-t px-4 py-2 flex items-center justify-between">
-                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                  <span>Line 1, Column 1</span>
-                  <span>UTF-8</span>
-                  <span>{language.toUpperCase()}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    size="sm"
-                    onClick={runCode}
-                    disabled={isRunning}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    {isRunning ? (
-                      <>
-                        <Square className="w-4 h-4 mr-2" />
-                        Running...
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4 mr-2" />
-                        Run Code
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
+
+             
             </div>
 
             {/* Output Panel */}
@@ -398,6 +391,8 @@ console.log(solution());`)
           </div>
         </div>
       </div>
+
+      
 
       {/* Features Section */}
       <section className="py-20 bg-muted/30">
