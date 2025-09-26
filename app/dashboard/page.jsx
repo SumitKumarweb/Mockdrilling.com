@@ -512,6 +512,56 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
+              {/* Blog Section */}
+              <Card className="bg-black/40 border-blue-500/20 backdrop-blur-xl">
+                <CardHeader>
+                  <CardTitle className="text-white font-mono flex items-center justify-between">
+                    <div className="flex items-center">
+                      <MessageSquare className="w-5 h-5 mr-2 text-blue-400" />
+                      Blog Management
+                    </div>
+                    <Link href="/dashboard/blogs/create">
+                      <Button size="sm" className="bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30">
+                        <Plus className="w-4 h-4 mr-1" />
+                        Write Blog
+                      </Button>
+                    </Link>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                      <div className="flex items-center space-x-3">
+                        <MessageSquare className="w-5 h-5 text-blue-400" />
+                        <div>
+                          <p className="text-white font-mono text-sm font-bold">Share Your Knowledge</p>
+                          <p className="text-gray-400 font-mono text-xs">Write and publish blog posts</p>
+                        </div>
+                      </div>
+                      <Link href="/dashboard/blogs">
+                        <Button variant="outline" size="sm" className="bg-blue-500/20 border-blue-500/30 text-blue-400 hover:bg-blue-500/30">
+                          View All
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                      <div className="flex items-center space-x-3">
+                        <CheckCircle className="w-5 h-5 text-green-400" />
+                        <div>
+                          <p className="text-white font-mono text-sm font-bold">Community Blogs</p>
+                          <p className="text-gray-400 font-mono text-xs">Read posts from other developers</p>
+                        </div>
+                      </div>
+                      <Link href="/blogs">
+                        <Button variant="outline" size="sm" className="bg-green-500/20 border-green-500/30 text-green-400 hover:bg-green-500/30">
+                          Browse
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Achievements */}
               <Card className="bg-black/40 border-yellow-500/20 backdrop-blur-xl">
                 <CardHeader>
@@ -882,6 +932,18 @@ export default function Dashboard() {
                       <Button variant="outline" className="w-full bg-black/20 border-indigo-600 text-indigo-400 hover:text-white">
                         <MessageSquare className="w-4 h-4 mr-2" />
                         Feedback
+                      </Button>
+                    </Link>
+                    <Link href="/dashboard/blogs">
+                      <Button variant="outline" className="w-full bg-black/20 border-green-600 text-green-400 hover:text-white">
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        My Blogs
+                      </Button>
+                    </Link>
+                    <Link href="/dashboard/blogs/create">
+                      <Button variant="outline" className="w-full bg-black/20 border-blue-600 text-blue-400 hover:text-white">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Write Blog
                       </Button>
                     </Link>
                     <Button

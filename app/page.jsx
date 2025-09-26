@@ -81,7 +81,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 cursor-pointer" onClick={() => router.push('/')}>
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <Code className="w-5 h-5 text-white" />
               </div>
@@ -92,16 +92,25 @@ export default function HomePage() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#free-mock" className="text-sm font-medium hover:text-primary transition-colors">
-                Free Mock Interview
+              <a href="/about" className="text-sm font-medium hover:text-primary transition-colors">
+                About Us
               </a>
-              <a href="#paid-mock" className="text-sm font-medium hover:text-primary transition-colors">
-                Professional Mock Interview
+              <a href="/contact" className="text-sm font-medium hover:text-primary transition-colors">
+                Contact
               </a>
-              <Button variant="outline" size="sm">
+              <a href="/editor" className="text-sm font-medium hover:text-primary transition-colors">
+                Online Editor
+              </a>
+              <a href="/blogs" className="text-sm font-medium hover:text-primary transition-colors">
+                Blogs
+              </a>
+              <a href="/community" className="text-sm font-medium hover:text-primary transition-colors">
+                Community
+              </a>
+              <Button variant="outline" size="sm" onClick={() => router.push('/auth/login')}>
                 Login
               </Button>
-              <Button size="sm">Sign Up</Button>
+              <Button size="sm" onClick={() => router.push('/auth/signup')}>Sign Up</Button>
               <Button variant="ghost" size="sm" onClick={toggleTheme} className="w-9 h-9 p-0">
                 {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </Button>
@@ -122,17 +131,26 @@ export default function HomePage() {
           {isMenuOpen && (
             <div className="md:hidden py-4 border-t">
               <div className="flex flex-col space-y-4">
-                <a href="#free-mock" className="text-sm font-medium hover:text-primary transition-colors">
-                  Free Mock Interview
+                <a href="/about" className="text-sm font-medium hover:text-primary transition-colors">
+                  About Us
                 </a>
-                <a href="#paid-mock" className="text-sm font-medium hover:text-primary transition-colors">
-                  Professional Mock Interview
+                <a href="/contact" className="text-sm font-medium hover:text-primary transition-colors">
+                  Contact
+                </a>
+                <a href="/editor" className="text-sm font-medium hover:text-primary transition-colors">
+                  Online Editor
+                </a>
+                <a href="/blogs" className="text-sm font-medium hover:text-primary transition-colors">
+                  Blogs
+                </a>
+                <a href="/community" className="text-sm font-medium hover:text-primary transition-colors">
+                  Community
                 </a>
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" className="flex-1 bg-transparent">
+                  <Button variant="outline" size="sm" className="flex-1 bg-transparent" onClick={() => router.push('/auth/login')}>
                     Login
                   </Button>
-                  <Button size="sm" className="flex-1">
+                  <Button size="sm" className="flex-1" onClick={() => router.push('/auth/signup')}>
                     Sign Up
                   </Button>
                 </div>

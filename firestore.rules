@@ -21,9 +21,37 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
     
-    // Default rule - deny all other access
-    match /{document=**} {
-      allow read, write: if false;
+    // Blogs collection
+    match /blogs/{blogId} {
+      // Anyone can create a blog draft (awaiting approval)
+      allow create: if true;
+      // Read allowed if approved, or if the requester is authenticated (to see their own drafts in UI)
+      allow read: if resource.data.approved == true || request.auth != null;
+      // Only admin can update/approve/delete
+      allow update, delete: if request.auth != null && (
+        request.auth.token.email == 'admin@mockdrilling.com'
+      );
     }
+
+    // Community posts (anonymous allowed)
+    match /community/{postId} {
+      // Allow anyone to read and create posts/comments
+      allow read: if true;
+      allow create: if true;
+      // Only admin can update/delete (e.g., moderate)
+      allow update, delete: if request.auth != null && (
+        request.auth.token.email == 'admin@mockdrilling.com'
+      );
+
+      // Nested comments under each post
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if true;
+        allow update, delete: if request.auth != null && request.auth.token.email == 'admin@mockdrilling.com';
+      }
+    }
+
+    // Default rule - deny all other access
+    match /{document=**} { allow read, write: if false; }
   }
 } 
