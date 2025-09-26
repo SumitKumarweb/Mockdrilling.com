@@ -11,6 +11,8 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 })
     }
 
+    const computedStatus = interviewType === 'take' ? 'approved' : status
+
     const requestData = {
       userId,
       userName: userName || 'Unknown User',
@@ -18,7 +20,7 @@ export async function POST(request) {
       interviewType, // 'take' or 'give'
       domain,
       message: message || '',
-      status, // 'pending', 'approved', 'rejected', 'assigned'
+      status: computedStatus, // 'pending', 'approved', 'rejected', 'assigned'
       assignedTo: null, // Will be set when admin assigns
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

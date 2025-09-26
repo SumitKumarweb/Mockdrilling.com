@@ -227,6 +227,7 @@ export default function AdminPage() {
     try {
       const response = await fetch(`/api/interview-requests?status=${requestStatusFilter}`)
       const result = await response.json()
+      console.log("Requests:", result);
       if (result.success) {
         setRequests(result.requests)
       } else {
