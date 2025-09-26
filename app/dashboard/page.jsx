@@ -28,11 +28,17 @@ import {
   MessageSquare,
   Users,
   BarChart3,
+  Bell,
+  CheckCircle,
+  XCircle,
+  Clock,
+  ExternalLink,
 } from "lucide-react"
 import Link from "next/link"
 import DrillPointsModal from "../components/drill-points-modal"
 import ProtectedRoute from "@/components/protected-route"
 import { useAuth } from "@/hooks/useAuth"
+import NotificationsBell from "../components/notification-bell"
 
 export default function Dashboard() {
   const { user: authUser, userProfile, logout } = useAuth()
@@ -40,11 +46,18 @@ export default function Dashboard() {
   const [loadingActivities, setLoadingActivities] = useState(true)
   const [rankings, setRankings] = useState([])
   const [loadingRankings, setLoadingRankings] = useState(true)
-                const [userRank, setUserRank] = useState(null)
-              const [showDrillPointsModal, setShowDrillPointsModal] = useState(false)
-              const [achievements, setAchievements] = useState([])
-              const [achievementsLoading, setAchievementsLoading] = useState(true)
-  
+  const [userRank, setUserRank] = useState(null)
+  const [showDrillPointsModal, setShowDrillPointsModal] = useState(false)
+  const [achievements, setAchievements] = useState([])
+  const [achievementsLoading, setAchievementsLoading] = useState(true)
+  const [schedulingRequest, setSchedulingRequest] = useState(null)
+  const [scheduleForm, setScheduleForm] = useState({
+    interviewDate: '',
+    interviewTime: '',
+    meetingLink: '',
+    adminNotes: ''
+  })
+
   // Use userProfile data if available, otherwise fallback to auth user data
   const user = {
     name: userProfile?.name || authUser?.displayName || "User",
@@ -185,6 +198,47 @@ export default function Dashboard() {
     }
   }, [userProfile?.drillPoints, userProfile?.interviewsTaken, userProfile?.interviewsGiven])
 
+  const handleScheduleInterview = (request) => {
+    setSchedulingRequest(request)
+    setScheduleForm({
+      interviewDate: '',
+      interviewTime: '',
+      meetingLink: '',
+      adminNotes: ''
+    })
+  }
+
+  const handleScheduleSubmit = async () => {
+    if (!schedulingRequest || !scheduleForm.interviewDate || !scheduleForm.interviewTime) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/interview-requests/${schedulingRequest.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'assigned',
+          interviewDate: scheduleForm.interviewDate,
+          interviewTime: scheduleForm.interviewTime,
+          meetingLink: scheduleForm.meetingLink,
+          adminNotes: scheduleForm.adminNotes
+        })
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        setSchedulingRequest(null)
+        // loadRequests() // Refresh the requests list - This function is not defined in the original file
+        alert('Interview scheduled successfully!')
+      } else {
+        alert(result.error || 'Failed to schedule interview')
+      }
+    } catch (error) {
+      alert('Failed to schedule interview. Please try again.')
+    }
+  }
 
 
   return (
@@ -209,6 +263,7 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center space-x-4">
+                <NotificationsBell />
                 <div 
                   className="flex items-center space-x-2 bg-black/60 rounded-lg px-3 py-2 border border-green-500/30 cursor-pointer hover:bg-black/80 transition-colors"
                   onClick={() => setShowDrillPointsModal(true)}
@@ -879,6 +934,78 @@ export default function Dashboard() {
           isOpen={showDrillPointsModal}
           onClose={() => setShowDrillPointsModal(false)}
         />
+        {/* Schedule Interview Modal */}
+        {schedulingRequest && (
+          <Dialog open={!!schedulingRequest} onOpenChange={() => setSchedulingRequest(null)}>
+            <DialogContent className="bg-black/90 border-gray-600 max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-white font-mono">Schedule Interview</DialogTitle>
+                <DialogDescription className="text-gray-400 font-mono">
+                  Schedule interview for {schedulingRequest.userName} - {schedulingRequest.domain}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-gray-300 font-mono text-sm mb-2 block">Interview Date *</label>
+                    <Input
+                      type="date"
+                      value={scheduleForm.interviewDate}
+                      onChange={(e) => setScheduleForm({...scheduleForm, interviewDate: e.target.value})}
+                      className="bg-black/20 border-gray-600 text-white font-mono"
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-300 font-mono text-sm mb-2 block">Interview Time *</label>
+                    <Input
+                      type="time"
+                      value={scheduleForm.interviewTime}
+                      onChange={(e) => setScheduleForm({...scheduleForm, interviewTime: e.target.value})}
+                      className="bg-black/20 border-gray-600 text-white font-mono"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-gray-300 font-mono text-sm mb-2 block">Meeting Link</label>
+                  <Input
+                    type="url"
+                    placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                    value={scheduleForm.meetingLink}
+                    onChange={(e) => setScheduleForm({...scheduleForm, meetingLink: e.target.value})}
+                    className="bg-black/20 border-gray-600 text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-300 font-mono text-sm mb-2 block">Admin Notes</label>
+                  <Textarea
+                    placeholder="Any additional notes for the candidate..."
+                    value={scheduleForm.adminNotes}
+                    onChange={(e) => setScheduleForm({...scheduleForm, adminNotes: e.target.value})}
+                    className="bg-black/20 border-gray-600 text-white font-mono"
+                    rows={3}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setSchedulingRequest(null)}
+                    className="bg-gray-500/10 border-gray-500/30 text-gray-400 hover:bg-gray-500/20 font-mono"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleScheduleSubmit}
+                    className="bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 font-mono"
+                  >
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Schedule Interview
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
     </div>
     </ProtectedRoute>
   )

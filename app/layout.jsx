@@ -42,7 +42,7 @@ export default function RootLayout({ children }) {
         >
           <AuthProvider>
             {children}
-            <DebugAuth />
+            {/* <DebugAuth /> */}
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -20,6 +20,7 @@ import {
   Minus,
   AlertCircle,
   CheckCircle,
+  RefreshCw,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -29,7 +30,11 @@ import { useAuth } from "@/hooks/useAuth"
 export default function InterviewSelectPage() {
   const [selectedOption, setSelectedOption] = useState(null)
   const [selectedDomain, setSelectedDomain] = useState(null)
-  const { userProfile } = useAuth()
+  const [requestMessage, setRequestMessage] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState("")
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const { userProfile, user } = useAuth()
   const router = useRouter()
   
   const userPoints = userProfile?.drillPoints || 1000
@@ -87,12 +92,44 @@ export default function InterviewSelectPage() {
     },
   ]
 
-  const canProceed = selectedOption && selectedDomain && (selectedOption === "take" || userPoints >= 120)
+  const selected = interviewOptions.find((o) => o.id === selectedOption)
+  const canProceed = selectedOption && selectedDomain
 
-  const handleProceed = () => {
-    if (canProceed) {
-      // Pass the interview type as a URL parameter
-      router.push(`/dashboard/interview/take/${selectedDomain}?type=${selectedOption}`)
+  const handleSubmitRequest = async () => {
+    if (!canProceed || !user) return
+    
+    setIsSubmitting(true)
+    setSubmitError("")
+    
+    try {
+      const response = await fetch('/api/interview-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.uid,
+          userName: userProfile?.name || user.displayName || 'Unknown User',
+          userEmail: user.email || 'No Email',
+          interviewType: selectedOption,
+          domain: selectedDomain,
+          message: requestMessage,
+        })
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        setSubmitSuccess(true)
+        // Reset form
+        setSelectedOption(null)
+        setSelectedDomain(null)
+        setRequestMessage("")
+      } else {
+        setSubmitError(result.error || 'Failed to submit request')
+      }
+    } catch (error) {
+      setSubmitError('Failed to submit request. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -133,9 +170,9 @@ export default function InterviewSelectPage() {
           {/* Title */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white font-mono mb-2">
-              <span className="text-green-400">$</span> Choose Your Interview Mode
+              <span className="text-green-400">$</span> Request Interview Session
             </h1>
-            <p className="text-gray-400 font-mono">Select whether you want to take or give an interview</p>
+            <p className="text-gray-400 font-mono">Submit a request for interview approval</p>
           </div>
 
           {/* Step 1: Interview Type */}
@@ -149,7 +186,7 @@ export default function InterviewSelectPage() {
               {interviewOptions.map((option) => {
                 const Icon = option.icon
                 const isSelected = selectedOption === option.id
-                const canAfford = option.id === "give" || userPoints >= Math.abs(option.cost)
+                const canAfford = option.cost <= 0 || userPoints >= option.cost
 
                 return (
                   <Card
@@ -247,7 +284,7 @@ export default function InterviewSelectPage() {
             </div>
           )}
 
-          {/* Summary & Proceed */}
+          {/* Request Form */}
           {selectedOption && selectedDomain && (
             <div className="space-y-6">
               <Separator className="bg-gray-600" />
@@ -256,7 +293,7 @@ export default function InterviewSelectPage() {
                 <CardHeader>
                   <CardTitle className="text-white font-mono flex items-center">
                     <Terminal className="w-5 h-5 mr-2 text-green-400" />
-                    Interview Summary
+                    Interview Request Details
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -274,11 +311,11 @@ export default function InterviewSelectPage() {
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-gray-400 font-mono text-sm">Cost:</p>
+                      <p className="text-gray-400 font-mono text-sm">Points Impact:</p>
                       <p
-                        className={`font-mono font-bold ${selectedOption === "take" ? "text-red-400" : "text-green-400"}`}
+                        className={`font-mono font-bold ${selectedOption === "give" ? "text-red-400" : "text-green-400"}`}
                       >
-                        {selectedOption === "take" ? "-120" : "+100"} Drill Points
+                        {selectedOption === "give" ? "-120" : "+100"} Drill Points
                       </p>
                     </div>
                     <div className="space-y-2">
@@ -287,29 +324,46 @@ export default function InterviewSelectPage() {
                     </div>
                   </div>
 
-                  {selectedOption === "take" && userPoints < 120 && (
+                  <div className="space-y-2">
+                    <label className="text-gray-300 font-mono text-sm">Additional Message (Optional)</label>
+                    <textarea
+                      value={requestMessage}
+                      onChange={(e) => setRequestMessage(e.target.value)}
+                      placeholder="Any specific requirements or notes for the admin..."
+                      className="w-full bg-black/20 border border-gray-600 text-white rounded-md px-3 py-2 font-mono text-sm resize-none h-20"
+                    />
+                  </div>
+
+                  {submitError && (
                     <Alert className="bg-red-500/10 border-red-500/30 text-red-400">
                       <AlertCircle className="h-4 w-4" />
+                      <AlertDescription className="font-mono">{submitError}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {submitSuccess && (
+                    <Alert className="bg-green-500/10 border-green-500/30 text-green-400">
+                      <CheckCircle className="h-4 w-4" />
                       <AlertDescription className="font-mono">
-                        Insufficient drill points. You need 120 DP to take an interview.
+                        Request submitted successfully! Admin will review and approve your request.
                       </AlertDescription>
                     </Alert>
                   )}
 
                   <Button
-                    onClick={handleProceed}
-                    disabled={!canProceed}
+                    onClick={handleSubmitRequest}
+                    disabled={!canProceed || isSubmitting}
                     className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-black font-mono font-bold text-lg py-6"
                   >
-                    {selectedOption === "take" ? (
+                    {isSubmitting ? (
                       <>
-                        <Target className="w-5 h-5 mr-2" />
-                        Start Taking Interview
+                        <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                        Submitting Request...
                       </>
                     ) : (
                       <>
-                        <Users className="w-5 h-5 mr-2" />
-                        Start Giving Interview
+                        <Target className="w-5 h-5 mr-2" />
+                        Submit Interview Request
                       </>
                     )}
                     <ArrowRight className="w-5 h-5 ml-2" />

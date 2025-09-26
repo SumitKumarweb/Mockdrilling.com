@@ -277,13 +277,11 @@ function calculateScores(code, language, responses) {
   }
 }
 
-// Calculate drill points based on interview type
-function calculateDrillPoints(scores, duration, interviewType) {
+  // Calculate drill points based on interview type (fixed rule)
+  function calculateDrillPoints(scores, duration, interviewType) {
   if (interviewType === 'take') {
-    // Taking an interview directly adds 100 points
     return 100
   } else if (interviewType === 'give') {
-    // Giving an interview directly deducts 120 points
     return -120
   }
   
