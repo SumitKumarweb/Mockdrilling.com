@@ -13,16 +13,6 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog"
 import { useAuth } from "@/hooks/useAuth"
-import { db } from "@/lib/firebase"
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  doc,
-  updateDoc
-} from "firebase/firestore"
 
 export default function NotificationsBell() {
   const { user } = useAuth()
@@ -31,71 +21,70 @@ export default function NotificationsBell() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
+  const load = async () => {
     if (!user?.uid) return
     setLoading(true)
-
-    const q = query(
-      collection(db, "notifications"),
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc")
-    )
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const notifs = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-        setNotifications(notifs)
-        setUnreadCount(notifs.filter((n) => !n.read).length)
-        setLoading(false)
-      },
-      (error) => {
-        console.error("Error fetching notifications:", error)
-        setLoading(false)
+    try {
+      const res = await fetch(`/api/notifications?userId=${user.uid}`)
+      const json = await res.json()
+      if (json.success) {
+        // Hard-filter on userId to avoid any leaked notifications
+        const own = (json.notifications || []).filter(n => n.userId === user.uid)
+        const sorted = [...own].sort((a, b) => {
+          const ta = a.createdAt?.toDate
+            ? a.createdAt.toDate().getTime()
+            : new Date(a.createdAt).getTime()
+          const tb = b.createdAt?.toDate
+            ? b.createdAt.toDate().getTime()
+            : new Date(b.createdAt).getTime()
+          return tb - ta
+        })
+        setNotifications(sorted)
+        setUnreadCount(sorted.filter((n) => !n.read).length)
       }
-    )
+    } catch (e) {
+      console.error('Failed to load notifications:', e)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-    return () => unsubscribe()
-  }, [user?.uid])
+  // Fetch when dialog opens or user changes
+  useEffect(() => {
+    if (open) load()
+  }, [open, user?.uid])
 
   // 🔹 Mark all notifications as read
   const markAllAsRead = async () => {
     try {
       const unread = notifications.filter((n) => !n.read)
       await Promise.all(
-        unread.map((n) =>
-          updateDoc(doc(db, "notifications", n.id), { read: true })
-        )
+        unread.map((n) => fetch(`/api/notifications/${n.id}`, { method: 'PATCH' }))
       )
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+      setUnreadCount(0)
     } catch (error) {
       console.error("Failed to mark all as read:", error)
     }
   }
 
-  // 🔹 Handle click on notification
+  // 🔹 Handle click on a notification
   const handleNotificationClick = async (n) => {
-    console.log("Notification clicked:", n)
     try {
       if (!n.read) {
-        await updateDoc(doc(db, "notifications", n.id), { read: true })
+        await fetch(`/api/notifications/${n.id}`, { method: 'PATCH' })
         setNotifications((prev) =>
           prev.map((x) => (x.id === n.id ? { ...x, read: true } : x))
         )
         setUnreadCount((prev) => Math.max(0, prev - 1))
       }
 
-      // 🔹 Fetch extra details
-      const res = await fetch(`/api/notification-request?id=${n.id}`)
-      const data = await res.json()
-
-      if (res.ok) {
-        console.log("Notification details:", data)
-        // 👉 Optionally show a new modal with details
-      } else {
-        console.error("Failed to fetch notification details:", data.error)
+      // If interview scheduled, open meeting link if present
+      if (n.type === "interview_scheduled" && n.data?.meetingLink) {
+        setOpen(false)
+        try {
+          window.open(n.data.meetingLink, "_blank", "noopener,noreferrer")
+        } catch (_) {}
       }
     } catch (error) {
       console.error("Error handling notification click:", error)
@@ -213,7 +202,6 @@ export default function NotificationsBell() {
                         {n.message}
                       </p>
 
-                      {/* 🔹 Slot Details for Scheduled Interviews */}
                       {n.data?.interviewDate && (
                         <div className="mt-3 p-3 bg-black/40 rounded-lg border border-gray-600">
                           <div className="flex items-center space-x-2 mb-2">
