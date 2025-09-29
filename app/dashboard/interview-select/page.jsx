@@ -35,6 +35,7 @@ export default function InterviewSelectPage() {
   const [submitError, setSubmitError] = useState("")
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const { userProfile, user } = useAuth()
+  const [afterSubmit, setAfterSubmit] = useState(false)
   const router = useRouter()
   
   const userPoints = userProfile?.drillPoints || 1000
@@ -123,6 +124,7 @@ export default function InterviewSelectPage() {
         setSelectedOption(null)
         setSelectedDomain(null)
         setRequestMessage("")
+        setAfterSubmit(true)
       } else {
         setSubmitError(result.error || 'Failed to submit request')
       }
@@ -166,7 +168,20 @@ export default function InterviewSelectPage() {
           </div>
         </header>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div>
+          {afterSubmit && (
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <Alert className="bg-green-500/10 border-green-500/30 text-green-400">
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription className="font-mono">Request submitted successfully! Admin will review and approve your request.</AlertDescription>
+              </Alert>
+            </div>
+          )}
+        </div>
+
+        {
+          !afterSubmit && (
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Title */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white font-mono mb-2">
@@ -260,7 +275,7 @@ export default function InterviewSelectPage() {
                   return (
                     <Card
                       key={domain.id}
-                      className={`cursor-pointer transition-all duration-300 ${
+                      className={`cursor-pointer transitionn-all duration-300 ${
                         isSelected
                           ? "bg-blue-500/20 border-blue-500/50 shadow-lg"
                           : "bg-black/40 border-gray-600/30 hover:border-gray-500/50"
@@ -373,6 +388,8 @@ export default function InterviewSelectPage() {
             </div>
           )}
         </div>
+          )
+        }
       </div>
     </ProtectedRoute>
   )
